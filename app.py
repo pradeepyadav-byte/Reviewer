@@ -85,6 +85,43 @@ def compute_progress(reviewed_series: pd.Series) -> tuple[int, int, float]:
     return reviewed, total, pct
 
 
+def persist_review_draft(
+    row_index,
+    choice_key: str,
+    final_key: str,
+    notes_key: str,
+    assistant_val: str = "",
+    gemma_val: str = "",
+) -> None:
+    """Keep in-progress edits when Streamlit reruns or the user switches rows."""
+    df_review = st.session_state.get("df_review")
+    if df_review is None or row_index not in df_review.index:
+        return
+
+    radio_key = f"{choice_key}_radio"
+    previous_choice = st.session_state.get(choice_key, "")
+    selected_choice = st.session_state.get(radio_key, st.session_state.get(choice_key, ""))
+    final_response = str(st.session_state.get(final_key, ""))
+
+    default_responses = {
+        "Assistant is better": str(assistant_val),
+        "Gemma is better": str(gemma_val),
+        "Both are bad": "",
+    }
+    previous_default = default_responses.get(previous_choice)
+    if selected_choice != previous_choice and (
+        not final_response.strip() or final_response == previous_default
+    ):
+        final_response = default_responses.get(selected_choice, final_response)
+        st.session_state[final_key] = final_response
+
+    st.session_state[choice_key] = selected_choice
+
+    df_review.at[row_index, "review_choice"] = str(selected_choice)
+    df_review.at[row_index, "final_response"] = final_response
+    df_review.at[row_index, "reviewer_notes"] = str(st.session_state.get(notes_key, ""))
+
+
 def main():
     st.set_page_config(page_title="Response Review Dashboard", layout="wide")
     st.title("Response Review Dashboard")
@@ -330,6 +367,8 @@ def main():
     choice_key = f"choice_{idx}"
     notes_key = f"notes_{idx}"
     final_key = f"final_{idx}"
+    radio_key = f"{choice_key}_radio"
+    row_index = df_review.index[idx]
 
     # Initialize widget-backed session values BEFORE widget instantiation.
     # IMPORTANT: Do not reassign these keys after the widgets are created.
@@ -344,39 +383,36 @@ def main():
             st.session_state[final_key] = existing_final
         else:
             st.session_state[final_key] = gemma_val if default_choice == "Gemma is better" else assistant_val
+    if radio_key not in st.session_state:
+        st.session_state[radio_key] = st.session_state[choice_key]
 
 
     # Radio widget (selected value returned directly; no session assignment after instantiation)
     selected_choice = st.radio(
         "Selection",
         options=choice_options,
-        index=choice_options.index(st.session_state[choice_key]),
-        key=choice_key + "_radio",
+        index=choice_options.index(st.session_state[radio_key]),
+        key=radio_key,
         help="Select which response is better or if manual editing is needed.",
+        on_change=persist_review_draft,
+        args=(row_index, choice_key, final_key, notes_key, assistant_val, gemma_val),
     )
-
-    # Prefill logic happens BEFORE creating the widget.
-    # (Do not mutate st.session_state[final_key] after st.text_area is instantiated.)
-    if not is_reviewed:
-        if selected_choice == "Assistant is better" and not str(existing_final).strip():
-            st.session_state[final_key] = assistant_val
-        elif selected_choice == "Gemma is better" and not str(existing_final).strip():
-            st.session_state[final_key] = gemma_val
-        elif selected_choice == "Both are bad" and not str(existing_final).strip():
-            st.session_state[final_key] = ""
 
     final_response_text = st.text_area(
         "Final response (editable)",
         key=final_key,
         height=180,
+        on_change=persist_review_draft,
+        args=(row_index, choice_key, final_key, notes_key, assistant_val, gemma_val),
     )
 
 
     reviewer_notes = st.text_area(
         "Reviewer notes (optional)",
-        value=st.session_state[notes_key],
         height=120,
         key=notes_key,
+        on_change=persist_review_draft,
+        args=(row_index, choice_key, final_key, notes_key, assistant_val, gemma_val),
     )
 
 
