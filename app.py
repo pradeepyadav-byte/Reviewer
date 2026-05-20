@@ -307,7 +307,7 @@ def main():
     )
     pre_gemma = get_first_matching_column(
         df_review,
-        ["gaming", "gemma", "gemma_response", "gaming_response", "other_response"],
+        ["gemma", "gemma_response", "other_response"],
     )
     pre_category = get_first_matching_column(
         df_review,
@@ -329,7 +329,7 @@ def main():
     )
 
     col_gemma = st.selectbox(
-        "Gaming/Gemma response column (required)",
+        "Gemma response column (required)",
         options=cols,
         index=cols.index(pre_gemma) if pre_gemma in cols else min(2, len(cols) - 1),
         key="select_gemma_col",
@@ -430,7 +430,7 @@ def main():
         st.write(assistant_val)
 
     with resp_cols[1]:
-        st.markdown("### Gaming/Gemma")
+        st.markdown("### Gemma")
         st.write(gemma_val)
 
     # ---- Inputs for selection + final response ----
