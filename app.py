@@ -1,7 +1,6 @@
-import io
 from pathlib import Path
 from io import BytesIO
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 import pandas as pd
 import streamlit as st
@@ -32,6 +31,14 @@ def ensure_review_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def clear_review_widget_state() -> None:
+    """Clear per-row review widget state when a new upload is loaded."""
+    prefixes = ("choice_", "notes_", "final_")
+    for key in list(st.session_state.keys()):
+        if key.startswith(prefixes):
+            del st.session_state[key]
+
+
 def get_first_matching_column(df: pd.DataFrame, candidates: List[str]) -> Optional[str]:
     """Best-effort heuristic to preselect likely columns without hardcoding exact required names."""
 
@@ -57,6 +64,53 @@ def build_download_bytes(df: pd.DataFrame, fmt: str) -> bytes:
     raise ValueError(f"Unsupported download format: {fmt}")
 
 
+def get_autosave_path(source_name: str) -> Path:
+    """Return a stable autosave path for an uploaded source file."""
+    stem = Path(source_name).stem or "reviewed_output"
+    safe_stem = "".join(ch if ch.isalnum() or ch in (" ", "-", "_") else "_" for ch in stem).strip()
+    return Path.cwd() / f"{safe_stem or 'reviewed_output'}_autosave.xlsx"
+
+
+def write_review_xlsx(df: pd.DataFrame, output_path: Path) -> None:
+    """Write review data as xlsx, using a temporary file to avoid partial saves."""
+    tmp_path = output_path.with_suffix(".tmp.xlsx")
+    with pd.ExcelWriter(tmp_path, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="reviewed")
+    tmp_path.replace(output_path)
+
+
+def autosave_review_data(df: pd.DataFrame, source_name: str) -> Path:
+    """Persist the current review state immediately beside the app."""
+    output_path = get_autosave_path(source_name)
+    write_review_xlsx(df, output_path)
+    return output_path
+
+
+def can_restore_autosave(uploaded_df: pd.DataFrame, autosave_df: pd.DataFrame) -> bool:
+    """Avoid loading an autosave that belongs to a different data shape."""
+    if len(uploaded_df) != len(autosave_df):
+        return False
+
+    review_cols = {"review_choice", "final_response", "reviewer_notes", "reviewed_status"}
+    uploaded_cols = [c for c in uploaded_df.columns if c not in review_cols]
+    autosave_cols = set(autosave_df.columns)
+    return all(c in autosave_cols for c in uploaded_cols)
+
+
+def try_restore_autosave(uploaded_df: pd.DataFrame, source_name: str) -> tuple[pd.DataFrame, Optional[Path]]:
+    """Load a compatible autosave if one exists, otherwise return uploaded data."""
+    autosave_path = get_autosave_path(source_name)
+    if not autosave_path.exists():
+        return ensure_review_columns(uploaded_df.copy()), None
+
+    autosave_df = pd.read_excel(autosave_path)
+    autosave_df = ensure_review_columns(autosave_df)
+    if can_restore_autosave(uploaded_df, autosave_df):
+        return autosave_df, autosave_path
+
+    return ensure_review_columns(uploaded_df.copy()), None
+
+
 def save_review_file(df: pd.DataFrame, source_name: str) -> Path:
     """Write a reviewed copy beside the app using the uploaded file's extension when possible."""
     source_path = Path(source_name)
@@ -65,14 +119,15 @@ def save_review_file(df: pd.DataFrame, source_name: str) -> Path:
 
     if suffix not in {".csv", ".xlsx", ".xls"}:
         suffix = ".xlsx"
+    elif suffix == ".xls":
+        suffix = ".xlsx"
 
     output_path = Path.cwd() / f"{stem}_reviewed{suffix}"
 
     if suffix == ".csv":
         df.to_csv(output_path, index=False)
     else:
-        with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
-            df.to_excel(writer, index=False, sheet_name="reviewed")
+        write_review_xlsx(df, output_path)
 
     return output_path
 
@@ -121,6 +176,15 @@ def persist_review_draft(
     df_review.at[row_index, "final_response"] = final_response
     df_review.at[row_index, "reviewer_notes"] = str(st.session_state.get(notes_key, ""))
 
+    source_name = st.session_state.get("loaded_file_name")
+    if source_name:
+        try:
+            autosave_path = autosave_review_data(df_review, source_name)
+        except Exception as e:
+            st.session_state.autosave_status = f"Autosave failed: {e}"
+        else:
+            st.session_state.autosave_status = f"Autosaved to {autosave_path.name}"
+
 
 def main():
     st.set_page_config(page_title="Response Review Dashboard", layout="wide")
@@ -149,6 +213,10 @@ def main():
         st.session_state.loaded_file_name = None
     if "loaded_file_size" not in st.session_state:
         st.session_state.loaded_file_size = None
+    if "autosave_path" not in st.session_state:
+        st.session_state.autosave_path = None
+    if "autosave_status" not in st.session_state:
+        st.session_state.autosave_status = ""
 
     # ------------------ Upload ------------------
     st.subheader("1) Upload data")
@@ -179,17 +247,38 @@ def main():
                 st.error("Uploaded file contains no data.")
                 return
 
+            clear_review_widget_state()
+
+            try:
+                df_review, restored_path = try_restore_autosave(df, current_file_name)
+            except Exception as e:
+                st.warning(f"Could not restore autosave, starting from uploaded file: {e}")
+                df_review = ensure_review_columns(df.copy())
+                restored_path = None
+
             st.session_state.df_original = df.copy()
-            st.session_state.df_review = ensure_review_columns(df.copy())
+            st.session_state.df_review = df_review
             st.session_state.current_index = 0
             st.session_state.rows_loaded = True
             st.session_state.loaded_file_name = current_file_name
             st.session_state.loaded_file_size = current_file_size
+            st.session_state.autosave_path = get_autosave_path(current_file_name)
 
-            st.success(f"Loaded {len(df)} rows and {len(df.columns)} columns.")
+            if restored_path is not None:
+                st.session_state.autosave_status = f"Restored autosave from {restored_path.name}"
+                st.success(f"Restored autosaved review with {len(df_review)} rows.")
+            else:
+                try:
+                    autosave_path = autosave_review_data(df_review, current_file_name)
+                except Exception as e:
+                    st.session_state.autosave_status = f"Autosave failed: {e}"
+                    st.warning(f"Loaded {len(df)} rows, but initial autosave failed: {e}")
+                else:
+                    st.session_state.autosave_status = f"Autosaved to {autosave_path.name}"
+                    st.success(f"Loaded {len(df)} rows and {len(df.columns)} columns.")
 
             st.subheader("Preview")
-            st.dataframe(df.head(50), width="stretch", hide_index=True)
+            st.dataframe(df_review.head(50), width="stretch", hide_index=True)
         else:
             st.caption(f"Continuing review for `{current_file_name}`.")
 
@@ -200,6 +289,8 @@ def main():
         return
 
     df_review = st.session_state.df_review
+    if st.session_state.autosave_status:
+        st.caption(st.session_state.autosave_status)
 
     # ------------------ Column selection ------------------
     st.subheader("2) Map your columns")
@@ -434,6 +525,18 @@ def main():
         st.session_state.df_review.at[df_review.index[idx], "final_response"] = str(final_response_text)
         st.session_state.df_review.at[df_review.index[idx], "reviewer_notes"] = str(reviewer_notes)
         st.session_state.df_review.at[df_review.index[idx], "reviewed_status"] = "Reviewed"
+
+        try:
+            autosave_path = autosave_review_data(
+                st.session_state.df_review,
+                st.session_state.loaded_file_name or "reviewed_output.xlsx",
+            )
+        except Exception as e:
+            st.session_state.autosave_status = f"Autosave failed: {e}"
+            st.error(f"Saved in this session, but autosave failed: {e}")
+            return
+        else:
+            st.session_state.autosave_status = f"Autosaved to {autosave_path.name}"
 
         # Mark reviewed status as updated in local variables.
         st.success("Saved.")
