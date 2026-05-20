@@ -28,7 +28,16 @@ def ensure_review_columns(df: pd.DataFrame) -> pd.DataFrame:
     for col in ["review_choice", "final_response", "reviewer_notes", "reviewed_status"]:
         if col not in df.columns:
             df[col] = ""
+        else:
+            df[col] = df[col].fillna("")
     return df
+
+
+def display_text(value) -> str:
+    """Render empty pandas cells as blank text instead of 'nan'."""
+    if pd.isna(value):
+        return ""
+    return str(value)
 
 
 def clear_review_widget_state() -> None:
@@ -156,11 +165,11 @@ def persist_review_draft(
     radio_key = f"{choice_key}_radio"
     previous_choice = st.session_state.get(choice_key, "")
     selected_choice = st.session_state.get(radio_key, st.session_state.get(choice_key, ""))
-    final_response = str(st.session_state.get(final_key, ""))
+    final_response = display_text(st.session_state.get(final_key, ""))
 
     default_responses = {
-        "Assistant is better": str(assistant_val),
-        "Gemma is better": str(gemma_val),
+        "Assistant is better": display_text(assistant_val),
+        "Gemma is better": display_text(gemma_val),
         "Both are bad": "",
     }
     previous_default = default_responses.get(previous_choice)
@@ -174,7 +183,7 @@ def persist_review_draft(
 
     df_review.at[row_index, "review_choice"] = str(selected_choice)
     df_review.at[row_index, "final_response"] = final_response
-    df_review.at[row_index, "reviewer_notes"] = str(st.session_state.get(notes_key, ""))
+    df_review.at[row_index, "reviewer_notes"] = display_text(st.session_state.get(notes_key, ""))
 
     source_name = st.session_state.get("loaded_file_name")
     if source_name:
@@ -398,7 +407,7 @@ def main():
 
     idx = int(st.session_state.current_index)
     row_num_display = idx + 1
-    reviewed_status = str(df_review.iloc[idx]["reviewed_status"]) if "reviewed_status" in df_review.columns else ""
+    reviewed_status = display_text(df_review.iloc[idx]["reviewed_status"]) if "reviewed_status" in df_review.columns else ""
     is_reviewed = reviewed_status == "Reviewed"
 
     st.write(f"Row **{row_num_display} / {total_rows}**")
@@ -408,9 +417,9 @@ def main():
         st.info("This row is not reviewed yet.")
 
     # Retrieve row content
-    prompt_val = str(df_review.iloc[idx][st.session_state.col_prompt])
-    assistant_val = str(df_review.iloc[idx][st.session_state.col_assistant])
-    gemma_val = str(df_review.iloc[idx][st.session_state.col_gemma])
+    prompt_val = display_text(df_review.iloc[idx][st.session_state.col_prompt])
+    assistant_val = display_text(df_review.iloc[idx][st.session_state.col_assistant])
+    gemma_val = display_text(df_review.iloc[idx][st.session_state.col_gemma])
     category_val = None
     if st.session_state.col_category is not None:
         category_val = df_review.iloc[idx][st.session_state.col_category]
@@ -421,7 +430,7 @@ def main():
 
     if category_val is not None:
         st.markdown("**Problem/Category**")
-        st.write(str(category_val))
+        st.write(display_text(category_val))
 
     st.markdown("**Responses**")
     resp_cols = st.columns(2)
@@ -436,9 +445,9 @@ def main():
     # ---- Inputs for selection + final response ----
     st.markdown("**Choose the better response**")
 
-    existing_choice = str(df_review.iloc[idx]["review_choice"]) if "review_choice" in df_review.columns else ""
-    existing_final = str(df_review.iloc[idx]["final_response"]) if "final_response" in df_review.columns else ""
-    existing_notes = str(df_review.iloc[idx]["reviewer_notes"]) if "reviewer_notes" in df_review.columns else ""
+    existing_choice = display_text(df_review.iloc[idx]["review_choice"]) if "review_choice" in df_review.columns else ""
+    existing_final = display_text(df_review.iloc[idx]["final_response"]) if "final_response" in df_review.columns else ""
+    existing_notes = display_text(df_review.iloc[idx]["reviewer_notes"]) if "reviewer_notes" in df_review.columns else ""
 
     choice_options = [
         "Assistant is better",
@@ -509,21 +518,21 @@ def main():
 
     # Save button
     save_disabled = False
-    if selected_choice != "Both are bad" and not str(final_response_text).strip() and selected_choice != "Needs manual edit":
+    if selected_choice != "Both are bad" and not display_text(final_response_text).strip() and selected_choice != "Needs manual edit":
         # Requirement only explicitly forbids empty when saving for Both are bad.
         # But also enforce reasonable validation for automatic choices.
         save_disabled = True
 
     if st.button("Save current row", type="primary", disabled=save_disabled):
         # Validation
-        if selected_choice != "Both are bad" and not str(final_response_text).strip():
+        if selected_choice != "Both are bad" and not display_text(final_response_text).strip():
             st.error("Final response should not be empty for the selected option (except 'Both are bad').")
             return
 
         st.session_state.df_review.at[df_review.index[idx], "review_choice"] = selected_choice
 
-        st.session_state.df_review.at[df_review.index[idx], "final_response"] = str(final_response_text)
-        st.session_state.df_review.at[df_review.index[idx], "reviewer_notes"] = str(reviewer_notes)
+        st.session_state.df_review.at[df_review.index[idx], "final_response"] = display_text(final_response_text)
+        st.session_state.df_review.at[df_review.index[idx], "reviewer_notes"] = display_text(reviewer_notes)
         st.session_state.df_review.at[df_review.index[idx], "reviewed_status"] = "Reviewed"
 
         try:
