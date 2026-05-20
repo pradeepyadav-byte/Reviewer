@@ -6,6 +6,15 @@ import pandas as pd
 import streamlit as st
 
 
+REVIEW_COLUMNS = ["review_choice", "final_response", "reviewer_notes", "reviewed_status"]
+
+
+def display_text(value) -> str:
+    """Render empty pandas cells as blank text instead of 'nan'."""
+    if pd.isna(value):
+        return ""
+    return str(value)
+
 
 def load_dataframe(uploaded_file) -> pd.DataFrame:
     """Load CSV/XLS/XLSX into a pandas DataFrame."""
@@ -24,20 +33,14 @@ def load_dataframe(uploaded_file) -> pd.DataFrame:
 
 
 def ensure_review_columns(df: pd.DataFrame) -> pd.DataFrame:
-    """Add review columns if missing."""
-    for col in ["review_choice", "final_response", "reviewer_notes", "reviewed_status"]:
+    """Add review columns if missing and keep them writable as text."""
+    for col in REVIEW_COLUMNS:
         if col not in df.columns:
             df[col] = ""
         else:
-            df[col] = df[col].fillna("")
+            df[col] = df[col].map(display_text)
+        df[col] = df[col].astype("object")
     return df
-
-
-def display_text(value) -> str:
-    """Render empty pandas cells as blank text instead of 'nan'."""
-    if pd.isna(value):
-        return ""
-    return str(value)
 
 
 def clear_review_widget_state() -> None:
@@ -100,7 +103,7 @@ def can_restore_autosave(uploaded_df: pd.DataFrame, autosave_df: pd.DataFrame) -
     if len(uploaded_df) != len(autosave_df):
         return False
 
-    review_cols = {"review_choice", "final_response", "reviewer_notes", "reviewed_status"}
+    review_cols = set(REVIEW_COLUMNS)
     uploaded_cols = [c for c in uploaded_df.columns if c not in review_cols]
     autosave_cols = set(autosave_df.columns)
     return all(c in autosave_cols for c in uploaded_cols)
@@ -161,6 +164,8 @@ def persist_review_draft(
     df_review = st.session_state.get("df_review")
     if df_review is None or row_index not in df_review.index:
         return
+    df_review = ensure_review_columns(df_review)
+    st.session_state.df_review = df_review
 
     radio_key = f"{choice_key}_radio"
     previous_choice = st.session_state.get(choice_key, "")
@@ -298,6 +303,8 @@ def main():
         return
 
     df_review = st.session_state.df_review
+    df_review = ensure_review_columns(df_review)
+    st.session_state.df_review = df_review
     if st.session_state.autosave_status:
         st.caption(st.session_state.autosave_status)
 
