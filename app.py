@@ -314,7 +314,7 @@ def main():
 
     choice_options = [
         "Assistant is better",
-        "Gaming/Gemma is better",
+        "Gemma is better",
         "Both are bad",
         "Needs manual edit",
     ]
@@ -343,7 +343,7 @@ def main():
         if is_reviewed:
             st.session_state[final_key] = existing_final
         else:
-            st.session_state[final_key] = gemma_val if default_choice == "Gaming/Gemma is better" else assistant_val
+            st.session_state[final_key] = gemma_val if default_choice == "Gemma is better" else assistant_val
 
 
     # Radio widget (selected value returned directly; no session assignment after instantiation)
@@ -360,7 +360,7 @@ def main():
     if not is_reviewed:
         if selected_choice == "Assistant is better" and not str(existing_final).strip():
             st.session_state[final_key] = assistant_val
-        elif selected_choice == "Gaming/Gemma is better" and not str(existing_final).strip():
+        elif selected_choice == "Gemma is better" and not str(existing_final).strip():
             st.session_state[final_key] = gemma_val
         elif selected_choice == "Both are bad" and not str(existing_final).strip():
             st.session_state[final_key] = ""
@@ -417,8 +417,35 @@ def main():
     # Small confirmation preview of saved review columns.
     cols_to_preview = [c for c in ["review_choice", "final_response", "reviewer_notes", "reviewed_status"] if c in df_to_download.columns]
     if cols_to_preview:
-        st.caption("Preview of saved review fields (first 20 rows):")
-        st.dataframe(df_to_download[cols_to_preview].head(20), use_container_width=True, hide_index=True)
+        preview_cols = st.columns([1, 1])
+        with preview_cols[0]:
+            preview_scope = st.selectbox(
+                "Preview rows",
+                options=["First 20 rows", "All rows", "Reviewed rows", "Unreviewed rows"],
+                key="download_preview_scope",
+            )
+        with preview_cols[1]:
+            preview_columns = st.radio(
+                "Preview columns",
+                options=["Review fields only", "All columns"],
+                horizontal=True,
+                key="download_preview_columns",
+            )
+
+        if preview_scope == "All rows":
+            df_preview = df_to_download
+        elif preview_scope == "Reviewed rows":
+            df_preview = df_to_download[df_to_download["reviewed_status"] == "Reviewed"]
+        elif preview_scope == "Unreviewed rows":
+            df_preview = df_to_download[df_to_download["reviewed_status"] != "Reviewed"]
+        else:
+            df_preview = df_to_download.head(20)
+
+        if preview_columns == "Review fields only":
+            df_preview = df_preview[cols_to_preview]
+
+        st.caption(f"Preview showing {len(df_preview)} row(s). Downloads still include all {len(df_to_download)} row(s).")
+        st.dataframe(df_preview, use_container_width=True, hide_index=True)
 
     dl_cols = st.columns(2)
 
