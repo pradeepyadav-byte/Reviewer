@@ -5,7 +5,6 @@ import base64
 import hashlib
 import json
 import tempfile
-from datetime import datetime, timezone
 from typing import Optional
 
 import pandas as pd
@@ -28,7 +27,6 @@ REVIEW_COLUMNS = [
 ]
 COLUMN_MAPPING_VERSION = 5
 COLUMN_MAPPING_PAGE = None
-LLM_REVIEW_PAGE = None
 
 
 class MemoryUpload(BytesIO):
@@ -1030,10 +1028,6 @@ def inject_app_theme() -> None:
         .resource-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1rem; margin-top:2rem; }
         .resource-card { min-height:250px; padding:1.6rem; border:1px solid rgba(25,100,123,.12); border-radius:22px; background:#fbfaf6; transition:transform .22s ease,box-shadow .22s ease; }.resource-card:hover { transform:translateY(-6px); box-shadow:0 20px 42px rgba(21,31,36,.11); }.resource-card small { color:#ce0e2d; font-size:.6rem; font-weight:900; letter-spacing:.13em; text-transform:uppercase; }.resource-card h3 { margin:.7rem 0 .55rem; color:#151f24; font-size:1.35rem; }.resource-card p { color:#667074 !important; font-size:.78rem; line-height:1.7; }.resource-tags { display:flex; flex-wrap:wrap; gap:.4rem; margin-top:1.2rem; }.resource-tags span { padding:.4rem .55rem; border-radius:999px; color:#31545e; background:#e2f0f2; font-size:.58rem; font-weight:800; }
         .rating-guide { display:grid; grid-template-columns:repeat(5,1fr); gap:.65rem; margin-top:2rem; }.rating-guide div { padding:1rem; border-top:3px solid #19647b; background:white; }.rating-guide b { display:block; color:#151f24; font-size:1.5rem; }.rating-guide span { color:#71797c; font-size:.65rem; }
-        .projects-page-marker + div { scroll-margin-top:1rem; }
-        .projects-hero { max-width:1180px; margin:6.8rem auto 1.25rem; padding:clamp(1.4rem,4vw,3rem); border:1px solid rgba(25,100,123,.14); border-radius:28px; background:linear-gradient(135deg,rgba(255,255,255,.96),rgba(226,240,242,.9)); box-shadow:0 24px 65px rgba(21,31,36,.1); }
-        .projects-hero small { color:#19647b; font-size:.65rem; font-weight:900; letter-spacing:.14em; text-transform:uppercase; }.projects-hero h1 { margin:.6rem 0; color:#151f24; font-size:clamp(2.2rem,5vw,4.8rem); line-height:.96; letter-spacing:-.055em; }.projects-hero p { max-width:720px; margin:0; color:#667074 !important; line-height:1.65; }
-        .saved-project-card { min-height:100%; padding:1.15rem; border:1px solid rgba(25,100,123,.13); border-radius:18px; background:rgba(255,255,255,.94); box-shadow:0 12px 32px rgba(21,31,36,.07); }.saved-project-card small { color:#7a858b; font-size:.62rem; }.saved-project-card h3 { margin:.35rem 0 .25rem; color:#151f24; font-size:1rem; word-break:break-word; }.saved-project-card p { margin:0 0 .8rem; color:#6d767a !important; font-size:.72rem; }.saved-project-progress { height:7px; overflow:hidden; border-radius:99px; background:#e3e9e9; }.saved-project-progress i { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#19647b,#13a994); }
         .signin-shell { max-width:520px; margin:8vh auto 2rem; padding:2rem; text-align:center; border:1px solid rgba(109,93,252,.14); border-radius:24px; background:white; box-shadow:0 22px 55px rgba(52,44,120,.14); }
         .google-mark { display:grid; place-items:center; width:58px; height:58px; margin:0 auto 1.1rem; border:1px solid #e5e7ef; border-radius:16px; color:#4285f4; background:#fff; box-shadow:0 8px 20px rgba(40,44,80,.08); font-size:1.55rem; font-weight:900; }
         .signin-shell h1 { margin:.2rem 0 .5rem; color:#25283b; font-size:1.75rem; }
@@ -1668,35 +1662,6 @@ def inject_app_theme() -> None:
         @media (max-width: 1180px) {
             .creative-shape { opacity: 0.045; }
         }
-        @media (max-width: 760px) {
-            .block-container,.block-container:has(.workspace-page-marker),.block-container:has(.evaluation-page-marker) { width:100%; padding:.75rem .75rem 3rem; margin:0; border-radius:0; }
-            .inner-site-header { left:.55rem; right:.55rem; top:1.2rem; height:64px; }
-            .inner-site-header::before { top:-14px; height:78px; }
-            .inner-site-header > .news-top { min-height:58px; padding:.35rem .45rem; border-radius:18px; }
-            .inner-site-header .news-brand { font-size:1rem; padding:.5rem; }
-            .inner-site-header .news-nav { max-width:58vw; overflow-x:auto; }
-            .inner-site-header .news-nav a { padding:.52rem .58rem; font-size:.68rem; }
-            .inner-site-header .news-nav .nav-icon { display:none; }
-            .inner-site-header .news-actions { margin-left:auto; }
-            .nav-user-avatar { width:38px; height:38px; }
-            .parent-brand-card { min-height:0; padding:1rem; border-radius:18px; }
-            .hn-signal-network { display:none; }
-            .parent-brand-copy { max-width:70%; }.parent-brand-name { font-size:1.2rem; }.parent-brand-line { display:none; }
-            .parent-brand-cta { right:1rem; font-size:.62rem; }
-            div[data-testid="stMetric"] { padding:.65rem !important; }
-            div[data-testid="stMetricValue"] { font-size:1.35rem !important; }
-            div[data-testid="stHorizontalBlock"] { gap:.55rem; }
-            div[data-testid="stHorizontalBlock"]:has(div[data-testid="stMetric"]) { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); }
-            div[data-testid="stHorizontalBlock"]:has(div[data-testid="stMetric"]) > div { min-width:0; width:auto !important; }
-            div[data-testid="stHorizontalBlock"]:has(div[data-testid="stSlider"]) { display:grid; grid-template-columns:1fr; }
-            div[data-testid="stHorizontalBlock"]:has(div[data-testid="stSlider"]) > div { width:100% !important; }
-            div[data-testid="stHorizontalBlock"]:has(div[data-testid="stPills"]) { display:grid; grid-template-columns:1fr; }
-            div[data-testid="stHorizontalBlock"]:has(div[data-testid="stPills"]) > div { width:100% !important; }
-            .projects-hero { margin-top:5.8rem; padding:1.35rem; border-radius:20px; }
-            .projects-hero h1 { font-size:2.35rem; }
-            .site-footer { flex-direction:column; align-items:flex-start; }
-            textarea { font-size:16px !important; }
-        }
         </style>
         <div class="creative-backdrop" aria-hidden="true">
             <span class="creative-shape shape-ring-purple"></span>
@@ -1740,7 +1705,6 @@ def render_page_header(evaluation_started: bool) -> None:
                         <a href="./resources" target="_self"><i class="nav-icon">▤</i>Resources</a>
                         <a href="https://www.hyperneuronai.com/" target="_self"><i class="nav-icon">◇</i>Parent Website</a>
                         <a href="{review_href}" target="_self"><i class="nav-icon">→</i>Review Workspace</a>
-                        {f'<a href="./projects" target="_self"><i class="nav-icon">▦</i>Projects</a>' if signed_in else ''}
                     </nav>
                     <div class="news-actions">{account_navigation}</div>
                 </div>
@@ -1971,35 +1935,13 @@ def clear_review_widget_state() -> None:
     st.session_state.pop("pending_row_navigation", None)
 
 
-def user_state_directory() -> Path:
-    """Return the private state root for the current signed-in reviewer."""
+def active_dataset_directory() -> Path:
+    """Return a private, user-specific cache directory for refresh recovery."""
     identity = str(getattr(st.user, "email", None) or "local-reviewer").strip().lower()
     user_key = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:20]
     directory = Path.cwd() / ".mira_state" / user_key
     directory.mkdir(parents=True, exist_ok=True)
     return directory
-
-
-def project_id_for(source_name: str, source_size: int) -> str:
-    identity = f"{source_name.strip().lower()}::{int(source_size)}"
-    return hashlib.sha256(identity.encode("utf-8")).hexdigest()[:20]
-
-
-def project_directory(project_id: str) -> Path:
-    directory = user_state_directory() / "projects" / project_id
-    directory.mkdir(parents=True, exist_ok=True)
-    return directory
-
-
-def active_dataset_directory() -> Path:
-    """Return the active project's directory, including legacy-state support."""
-    root = user_state_directory()
-    pointer = root / "active_project.txt"
-    if pointer.exists():
-        project_id = pointer.read_text(encoding="utf-8").strip()
-        if project_id:
-            return project_directory(project_id)
-    return root
 
 
 def persist_active_dataset(
@@ -2009,18 +1951,15 @@ def persist_active_dataset(
     source_size: int,
 ) -> None:
     """Persist the active upload so a browser refresh can restore its mapping page."""
-    project_id = project_id_for(source_name, source_size)
-    directory = project_directory(project_id)
+    directory = active_dataset_directory()
     original_tmp = directory / "original.tmp.pkl.gz"
     review_tmp = directory / "review.tmp.pkl.gz"
     metadata_tmp = directory / "metadata.tmp.json"
     original_df.to_pickle(original_tmp, compression="gzip")
     review_df.to_pickle(review_tmp, compression="gzip")
     metadata = {
-        "project_id": project_id,
         "source_name": source_name,
         "source_size": int(source_size),
-        "updated_at": datetime.now(timezone.utc).isoformat(),
         "current_index": int(st.session_state.get("current_index", 0)),
         "col_prompt": st.session_state.get("col_prompt"),
         "response_columns": st.session_state.get("response_columns", []),
@@ -2035,63 +1974,6 @@ def persist_active_dataset(
     original_tmp.replace(directory / "original.pkl.gz")
     review_tmp.replace(directory / "review.pkl.gz")
     metadata_tmp.replace(directory / "metadata.json")
-    (user_state_directory() / "active_project.txt").write_text(project_id, encoding="utf-8")
-
-
-def list_review_projects() -> list[dict]:
-    """Return saved project summaries for the signed-in reviewer."""
-    projects = []
-    projects_root = user_state_directory() / "projects"
-    if not projects_root.exists():
-        return projects
-    for metadata_path in projects_root.glob("*/metadata.json"):
-        try:
-            metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
-            review_df = pd.read_pickle(metadata_path.parent / "review.pkl.gz", compression="gzip")
-        except (OSError, ValueError, TypeError, json.JSONDecodeError):
-            continue
-        reviewed, total, pct = compute_progress(ensure_review_columns(review_df)["reviewed_status"])
-        metadata.update({"reviewed": reviewed, "total": total, "progress": pct})
-        metadata["project_id"] = metadata.get("project_id") or metadata_path.parent.name
-        projects.append(metadata)
-    return sorted(projects, key=lambda item: item.get("updated_at", ""), reverse=True)
-
-
-def restore_project(project_id: str) -> bool:
-    """Restore a selected saved project and make it the active review."""
-    directory = project_directory(project_id)
-    original_path = directory / "original.pkl.gz"
-    review_path = directory / "review.pkl.gz"
-    metadata_path = directory / "metadata.json"
-    if not all(path.exists() for path in (original_path, review_path, metadata_path)):
-        return False
-    try:
-        metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
-        original_df = pd.read_pickle(original_path, compression="gzip")
-        review_df = pd.read_pickle(review_path, compression="gzip")
-    except (OSError, ValueError, TypeError, json.JSONDecodeError):
-        return False
-    clear_review_widget_state()
-    st.session_state.df_original = original_df
-    st.session_state.df_review = ensure_review_columns(review_df)
-    max_index = max(len(review_df) - 1, 0)
-    st.session_state.current_index = min(max(int(metadata.get("current_index") or 0), 0), max_index)
-    st.session_state.rows_loaded = True
-    st.session_state.loaded_file_name = str(metadata.get("source_name") or "Uploaded dataset")
-    st.session_state.loaded_file_size = int(metadata.get("source_size") or 0)
-    st.session_state.autosave_path = get_autosave_path(st.session_state.loaded_file_name)
-    st.session_state.col_prompt = metadata.get("col_prompt")
-    st.session_state.response_columns = list(metadata.get("response_columns") or [])
-    st.session_state.response_display_names = dict(metadata.get("response_display_names") or {})
-    st.session_state.column_display_names = dict(metadata.get("column_display_names") or {})
-    st.session_state.criteria_target_columns = list(metadata.get("criteria_target_columns") or [])
-    st.session_state.columns_confirmed = bool(metadata.get("columns_confirmed", False))
-    st.session_state.evaluation_column_slots = list(metadata.get("evaluation_column_slots") or [])
-    st.session_state.evaluation_column_defaults = {
-        int(key): value for key, value in dict(metadata.get("evaluation_column_defaults") or {}).items()
-    }
-    (user_state_directory() / "active_project.txt").write_text(project_id, encoding="utf-8")
-    return True
 
 
 def restore_active_dataset() -> bool:
@@ -2108,22 +1990,25 @@ def restore_active_dataset() -> bool:
         review_df = pd.read_pickle(review_path, compression="gzip")
     except (OSError, ValueError, TypeError, json.JSONDecodeError):
         return False
-    project_id = metadata.get("project_id")
-    if project_id:
-        return restore_project(str(project_id))
-    # Legacy single-project recovery.
     st.session_state.df_original = original_df
     st.session_state.df_review = ensure_review_columns(review_df)
-    st.session_state.current_index = min(max(int(metadata.get("current_index") or 0), 0), max(len(review_df) - 1, 0))
+    max_index = max(len(review_df) - 1, 0)
+    st.session_state.current_index = min(max(int(metadata.get("current_index") or 0), 0), max_index)
     st.session_state.rows_loaded = True
     st.session_state.loaded_file_name = str(metadata.get("source_name") or "Uploaded dataset")
     st.session_state.loaded_file_size = int(metadata.get("source_size") or 0)
+    st.session_state.autosave_path = get_autosave_path(st.session_state.loaded_file_name)
     st.session_state.col_prompt = metadata.get("col_prompt")
     st.session_state.response_columns = list(metadata.get("response_columns") or [])
     st.session_state.response_display_names = dict(metadata.get("response_display_names") or {})
     st.session_state.column_display_names = dict(metadata.get("column_display_names") or {})
     st.session_state.criteria_target_columns = list(metadata.get("criteria_target_columns") or [])
     st.session_state.columns_confirmed = bool(metadata.get("columns_confirmed", False))
+    st.session_state.evaluation_column_slots = list(metadata.get("evaluation_column_slots") or [])
+    st.session_state.evaluation_column_defaults = {
+        int(key): value
+        for key, value in dict(metadata.get("evaluation_column_defaults") or {}).items()
+    }
     return True
 
 
@@ -3238,7 +3123,6 @@ def render_inner_navigation(active_page: str) -> None:
     resources_active = " active" if active_page == "resources" else ""
     account_active = " active" if active_page == "account" else ""
     review_active = " active" if active_page == "review" else ""
-    projects_active = " active" if active_page == "projects" else ""
     if signed_in:
         nav_user_name = escape(str(getattr(st.user, "name", None) or "Google user"))
         nav_user_email = escape(str(getattr(st.user, "email", None) or ""))
@@ -3257,7 +3141,6 @@ def render_inner_navigation(active_page: str) -> None:
                     <a class="{resources_active.strip()}" href="./resources" target="_self"><i class="nav-icon">▤</i>Resources</a>
                     <a href="https://www.hyperneuronai.com/" target="_self"><i class="nav-icon">◇</i>Parent Website</a>
                     <a class="{review_active.strip()}" href="{review_href}" target="_self"><i class="nav-icon">→</i>Review Workspace</a>
-                    {f'<a class="{projects_active.strip()}" href="./projects" target="_self"><i class="nav-icon">▦</i>Projects</a>' if signed_in else ''}
                 </nav>
                 <div class="news-actions">{account_navigation}</div>
             </div>
@@ -3270,63 +3153,6 @@ def render_inner_navigation(active_page: str) -> None:
 def home_page():
     """Render the product landing page without workspace controls."""
     render_page_header(False)
-    render_site_footer()
-
-
-def projects_page():
-    """Show the signed-in reviewer's saved evaluations and resume them."""
-    signed_in = google_auth_configured() and bool(getattr(st.user, "is_logged_in", False))
-    if not signed_in:
-        st.components.v1.html(
-            """<script>window.parent.location.replace(window.parent.location.origin + '/account');</script>""",
-            height=0,
-        )
-        st.stop()
-    st.markdown('<div class="projects-page-marker"></div>', unsafe_allow_html=True)
-    render_inner_navigation("projects")
-    st.markdown(
-        """
-        <section class="projects-hero">
-            <small>Saved evaluation workspace</small>
-            <h1>Your review projects</h1>
-            <p>Every upload keeps its mapping, ratings, edited responses, progress and last active row. Resume after a disconnect without rebuilding the evaluation.</p>
-        </section>
-        """,
-        unsafe_allow_html=True,
-    )
-    projects = list_review_projects()
-    action_left, action_right = st.columns([1, 2])
-    with action_left:
-        st.page_link(LLM_REVIEW_PAGE, label="Start a new project", icon=":material/add:", width="stretch")
-    with action_right:
-        st.caption(f"{len(projects)} saved project{'s' if len(projects) != 1 else ''} for this account")
-    if not projects:
-        st.info("No saved projects yet. Upload a dataset to create your first review project.")
-        render_site_footer()
-        return
-    for row_start in range(0, len(projects), 3):
-        cards = st.columns(min(3, len(projects) - row_start))
-        for offset, project in enumerate(projects[row_start:row_start + 3]):
-            project_id = str(project["project_id"])
-            updated_raw = str(project.get("updated_at") or "")
-            try:
-                updated_label = datetime.fromisoformat(updated_raw).astimezone().strftime("%d %b %Y, %I:%M %p")
-            except ValueError:
-                updated_label = "Saved recently"
-            reviewed = int(project.get("reviewed") or 0)
-            total = int(project.get("total") or 0)
-            progress = float(project.get("progress") or 0)
-            current_row = min(int(project.get("current_index") or 0) + 1, max(total, 1))
-            with cards[offset]:
-                st.markdown(
-                    f"""<div class="saved-project-card"><small>Updated {escape(updated_label)}</small><h3>{escape(str(project.get('source_name') or 'Untitled review'))}</h3><p>{reviewed} of {total} rows reviewed · resume at row {current_row}</p><div class="saved-project-progress"><i style="width:{min(max(progress, 0), 100):.1f}%"></i></div></div>""",
-                    unsafe_allow_html=True,
-                )
-                if st.button("Resume project →", key=f"resume_project_{project_id}", width="stretch"):
-                    if restore_project(project_id):
-                        st.switch_page(COLUMN_MAPPING_PAGE)
-                    else:
-                        st.error("This project could not be restored.")
     render_site_footer()
 
 
@@ -3494,7 +3320,7 @@ def logout_page():
 
 def run_app():
     """Configure and run the multipage Streamlit application."""
-    global COLUMN_MAPPING_PAGE, LLM_REVIEW_PAGE
+    global COLUMN_MAPPING_PAGE
     st.set_page_config(page_title="MIRA · Model Inference and Response Annotation", page_icon="◉", layout="wide")
     inject_app_theme()
     auth_ready = google_auth_configured()
@@ -3505,19 +3331,12 @@ def run_app():
         icon=":material/account_tree:" if signed_in else ":material/lock:",
         url_path="column-mapping",
     )
-    LLM_REVIEW_PAGE = st.Page(
-        protected_llm_review_workspace,
-        title="SLM / LLM Data Review",
-        icon=":material/table_view:" if signed_in else ":material/lock:",
-        url_path="llm-review",
-    )
     if signed_in:
         pages = [
             st.Page(home_page, title="Home", icon=":material/home:", url_path="home", default=True),
             st.Page(protected_review_workspace, title="Review Workspace", icon=":material/rate_review:", url_path="review"),
-            LLM_REVIEW_PAGE,
+            st.Page(protected_llm_review_workspace, title="SLM / LLM Data Review", icon=":material/table_view:", url_path="llm-review"),
             COLUMN_MAPPING_PAGE,
-            st.Page(projects_page, title="Projects", icon=":material/folder_open:", url_path="projects"),
             st.Page(about_page, title="About", icon=":material/info:", url_path="about"),
             st.Page(resources_page, title="Resources", icon=":material/menu_book:", url_path="resources"),
             st.Page(account_page, title="Account", icon=":material/account_circle:", url_path="account"),
@@ -3527,7 +3346,7 @@ def run_app():
         pages = [
             st.Page(home_page, title="Home", icon=":material/home:", url_path="home", default=True),
             st.Page(protected_review_workspace, title="Review Workspace", icon=":material/lock:", url_path="review"),
-            LLM_REVIEW_PAGE,
+            st.Page(protected_llm_review_workspace, title="SLM / LLM Data Review", icon=":material/lock:", url_path="llm-review"),
             COLUMN_MAPPING_PAGE,
             st.Page(about_page, title="About", icon=":material/info:", url_path="about"),
             st.Page(resources_page, title="Resources", icon=":material/menu_book:", url_path="resources"),
