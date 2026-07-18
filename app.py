@@ -3524,6 +3524,7 @@ def run_app():
             st.Page(protected_review_workspace, title="Review Workspace", icon=":material/lock:", url_path="review"),
             LLM_REVIEW_PAGE,
             COLUMN_MAPPING_PAGE,
+            st.Page(projects_page, title="Projects", icon=":material/lock:", url_path="projects"),
             st.Page(about_page, title="About", icon=":material/info:", url_path="about"),
             st.Page(resources_page, title="Resources", icon=":material/menu_book:", url_path="resources"),
             st.Page(account_page, title="Sign in", icon=":material/login:", url_path="account"),
