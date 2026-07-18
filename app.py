@@ -430,6 +430,8 @@ def inject_app_theme() -> None:
         .stDownloadButton > button:hover,
         .stLinkButton > a:hover { transform:translateY(-2px); box-shadow:0 9px 20px rgba(52,44,120,.12); }
         .stButton > button[kind="primary"] { border:0 !important; background:linear-gradient(135deg,#6d5dfc,#5145cd) !important; box-shadow:0 9px 20px rgba(81,69,205,.22); }
+        .st-key-start_evaluation_button .stButton > button[kind="primary"] { color:white !important; border:1px solid rgba(142,240,219,.32) !important; background:linear-gradient(125deg,#151f24 0%,#19647b 58%,#13a994 100%) !important; box-shadow:0 12px 26px rgba(25,100,123,.28) !important; }
+        .st-key-start_evaluation_button .stButton > button[kind="primary"]:hover { border-color:#8ef0db !important; box-shadow:0 16px 32px rgba(25,100,123,.34) !important; }
 
         div[data-baseweb="input"] > div,
         div[data-baseweb="select"] > div,
@@ -2762,7 +2764,7 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
                 errors.append("Response display names must be unique.")
             return errors
 
-        if st.button("Start Evaluation", type="primary"):
+        if st.button("Start Evaluation", type="primary", key="start_evaluation_button"):
             mapping_errors = validate_mapping()
             if mapping_errors:
                 for error in mapping_errors:
