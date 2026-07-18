@@ -6,6 +6,7 @@ import hashlib
 import json
 import tempfile
 from datetime import datetime, timezone
+from textwrap import dedent
 from typing import Optional
 
 import pandas as pd
@@ -1608,13 +1609,15 @@ def inject_app_theme() -> None:
             .mira-wordmark small { display:none; }
             .mira-story-nav { gap:.55rem; }
             .mira-story-nav a { font-size:.6rem; }
+            .mira-story,.mira-news-header,.news-top { width:100%; max-width:100%; min-width:0; }
+            .mira-story { overflow:hidden; }
             .mira-news-header { padding:8px; }
-            .news-top { display:grid; grid-template-columns:auto 1fr; min-height:0; gap:.55rem; }
+            .news-top { display:flex; flex-wrap:wrap; min-height:0; gap:.55rem; }
             .news-brand { padding:.62rem .75rem; font-size:1rem; }
             .news-brand-mark { width:30px; transform:scale(.85); transform-origin:left center; }
-            .news-nav { grid-column:1/-1; grid-row:2; justify-content:flex-start; order:3; }
+            .news-nav { flex:0 0 100%; width:100%; min-width:0; justify-content:flex-start; order:3; overflow-x:auto; }
             .news-nav a { padding:.62rem .72rem; font-size:.66rem; }
-            .news-actions { justify-self:end; }
+            .news-actions { margin-left:auto; }
             .news-actions > a { display:inline-flex; padding:.55rem .72rem; font-size:.64rem; }
             .news-actions a.primary { display:inline-flex; padding:.55rem .72rem; font-size:.64rem; }
             .news-actions a.primary i { width:21px; height:21px; }
@@ -1699,7 +1702,7 @@ def render_page_header(evaluation_started: bool) -> None:
     else:
         account_navigation = '<a href="./account" target="_self">Account</a>'
 
-    st.markdown(
+    landing_markup = dedent(
         f"""
         <main class="mira-story">
             <header class="mira-news-header">
@@ -1776,7 +1779,13 @@ def render_page_header(evaluation_started: bool) -> None:
                 <a class="story-cta" href="{review_href}">Enter the Review Workspace →</a>
             </section>
         </main>
-        """,
+        """
+    ).strip()
+    # Streamlit's Markdown parser can interpret indented HTML as a code block on
+    # some mobile browsers. A compact string keeps the landing page valid HTML.
+    landing_markup = "".join(line.strip() for line in landing_markup.splitlines())
+    st.markdown(
+        landing_markup,
         unsafe_allow_html=True,
     )
 
