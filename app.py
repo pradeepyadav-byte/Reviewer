@@ -3470,6 +3470,12 @@ def protected_llm_review_workspace():
         )
         st.info("Sign in is required. Redirecting you to the login page…")
         st.stop()
+    # This route is the step immediately before column mapping/evaluation.
+    # When browser Back returns here, leave the evaluation view instead of
+    # rendering the same Progress screen again. The loaded dataset, ratings,
+    # autosave and current row remain intact and can be confirmed again.
+    if st.session_state.get("columns_confirmed", False):
+        st.session_state.columns_confirmed = False
     review_workspace(force_llm=True)
 
 
