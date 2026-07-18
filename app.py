@@ -1536,9 +1536,18 @@ def inject_app_theme() -> None:
 
         @media (max-width: 760px) {
             .block-container { padding-left: 1rem; padding-right: 1rem; }
-            .inner-site-header { position:relative !important; left:auto; right:auto; top:auto; width:100%; height:auto; min-height:0; }
+            div[data-testid="stMarkdownContainer"]:has(> .inner-site-header) { min-height:142px; }
+            .inner-site-header { position:relative !important; left:auto; right:auto; top:auto; display:block !important; width:100%; max-width:100%; height:auto; min-height:132px; margin:.35rem 0 1rem !important; padding:.45rem !important; overflow:hidden; border:1px solid rgba(21,31,36,.08); border-radius:20px; background:rgba(255,255,255,.97); box-shadow:0 12px 30px rgba(21,31,36,.1); }
             .inner-site-header::before { display:none; }
-            .inner-site-header > .news-top { position:relative; min-height:0; opacity:1; pointer-events:auto; transform:none; }
+            .inner-site-header > .news-top { position:relative !important; inset:auto !important; display:flex !important; flex-wrap:wrap !important; width:100%; min-width:0; min-height:0; padding:0 !important; opacity:1 !important; pointer-events:auto !important; transform:none !important; border:0; background:transparent; box-shadow:none; }
+            .inner-site-header .news-nav { display:flex !important; flex:0 0 100%; width:100%; min-width:0; order:3; overflow-x:auto; }
+            .inner-site-header .news-actions { margin-left:auto; }
+            .inner-site-header .nav-account-dropdown { position:fixed; z-index:1200; right:1rem; top:5rem; }
+            .stButton > button { color:#151f24 !important; background:#ffffff !important; -webkit-text-fill-color:#151f24 !important; }
+            .stButton > button p,.stButton > button span { color:inherit !important; -webkit-text-fill-color:inherit !important; }
+            .stButton > button[kind="primary"] { color:#ffffff !important; background:linear-gradient(135deg,#6d5dfc,#5145cd) !important; -webkit-text-fill-color:#ffffff !important; }
+            .stButton > button:disabled { color:#687377 !important; background:#eef1f2 !important; opacity:.72; -webkit-text-fill-color:#687377 !important; }
+            .projects-hero { margin:.5rem auto 1rem; padding:1.5rem; border-radius:22px; }
             .stApp:has(.workspace-page-marker) { background-position:68% top; background-size:auto 100vh; background-attachment:scroll; }
             .block-container:has(.mapping-page-marker) { width:calc(100% - 1rem); margin:4.5rem .5rem 2rem; padding:1rem; border-radius:22px; }
             .mapping-workbench-intro { padding:4.8rem 1rem 1.2rem; }.mapping-workbench-intro::before { left:1rem; top:1rem; }
