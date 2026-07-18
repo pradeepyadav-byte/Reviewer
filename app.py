@@ -1,6 +1,7 @@
 from pathlib import Path
 from io import BytesIO
 from html import escape
+import base64
 import hashlib
 import json
 import tempfile
@@ -37,10 +38,19 @@ class MemoryUpload(BytesIO):
         self.size = len(data)
 
 
+def _embed_theme_assets(markup: str) -> str:
+    """Inline optimized theme artwork so it works behind every deployment proxy."""
+    asset_dir = Path(__file__).resolve().parent / "static" / "embedded"
+    for asset_path in asset_dir.glob("*.webp"):
+        source_url = f"/app/static/{asset_path.stem}.png"
+        data_url = "data:image/webp;base64," + base64.b64encode(asset_path.read_bytes()).decode("ascii")
+        markup = markup.replace(source_url, data_url)
+    return markup
+
+
 def inject_app_theme() -> None:
     """Apply the dashboard's visual theme without changing widget behavior."""
-    st.markdown(
-        """
+    theme_markup = """
         <style>
         :root {
             --ink: #172033;
@@ -1660,7 +1670,9 @@ def inject_app_theme() -> None:
             <span class="creative-shape shape-triangle-teal"></span>
             <span class="creative-shape shape-cross-purple"></span>
         </div>
-        """,
+        """
+    st.markdown(
+        _embed_theme_assets(theme_markup),
         unsafe_allow_html=True,
     )
 
