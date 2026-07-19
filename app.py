@@ -27,7 +27,7 @@ REVIEW_COLUMNS = [
     "reviewer_notes",
     "reviewed_status",
 ]
-COLUMN_MAPPING_VERSION = 5
+COLUMN_MAPPING_VERSION = 6
 COLUMN_MAPPING_PAGE = None
 LLM_REVIEW_PAGE = None
 
@@ -380,8 +380,8 @@ def inject_app_theme() -> None:
         .st-key-review_feature_choice label:nth-child(2):hover::after { opacity:1; transform:translateY(0); }
         .st-key-review_feature_choice label p { color:#151f24 !important; font-size:.92rem !important; font-weight:850 !important; }
         .st-key-review_feature_choice label small { display:block; max-width:300px; margin-top:.65rem; color:#788186 !important; font-size:.68rem !important; font-weight:550 !important; line-height:1.75 !important; white-space:pre-line; }
-        .st-key-review_feature_choice label:first-child::before { content:"LLM"; position:absolute; left:1.05rem; bottom:1rem; padding:.3rem .45rem; color:white; border-radius:7px; background:#19647b; font-size:.48rem; font-weight:900; letter-spacing:.08em; }
-        .st-key-review_feature_choice label:nth-child(2)::before { content:"TTS"; position:absolute; left:1.05rem; bottom:1rem; padding:.3rem .45rem; color:white; border-radius:7px; background:#ef6d5a; font-size:.48rem; font-weight:900; letter-spacing:.08em; }
+        .st-key-review_feature_choice label:first-child::before { content:"SLM"; position:absolute; left:1.05rem; bottom:1rem; padding:.3rem .45rem; color:white; border-radius:7px; background:#19647b; font-size:.48rem; font-weight:900; letter-spacing:.08em; }
+        .st-key-review_feature_choice label:nth-child(2)::before { content:"LLM"; position:absolute; left:1.05rem; bottom:1rem; padding:.3rem .45rem; color:white; border-radius:7px; background:#ce0e2d; font-size:.48rem; font-weight:900; letter-spacing:.08em; }
         .review-feature-note { margin:.75rem 0 1rem; padding:.7rem .85rem; color:#607075; border-left:3px solid #13a994; border-radius:0 10px 10px 0; background:#eef8f6; font-size:.65rem; line-height:1.55; }
         .tts-coming-state { display:grid; place-items:center; min-height:190px; margin-top:.75rem; padding:1.2rem; color:#425157; border:1px dashed rgba(25,100,123,.25); border-radius:18px; background:linear-gradient(135deg,#eef8f6,#fff8ed); text-align:center; }.tts-coming-state b { display:block; margin-bottom:.35rem; color:#071c30; font-size:1.2rem; }.tts-coming-state span { max-width:420px; font-size:.72rem; line-height:1.6; }
         .empty-review-state { display:flex; align-items:center; justify-content:flex-start; gap:.9rem; width:100%; margin:1rem 0 0; padding:1rem 1.25rem; color:#526267; border:1px solid rgba(25,100,123,.16); border-radius:18px; background:#eef8f6; box-shadow:inset 0 0 0 1px rgba(255,255,255,.7); text-align:left; }
@@ -1722,7 +1722,6 @@ def render_page_header(evaluation_started: bool) -> None:
                     <nav class="news-nav" aria-label="Primary navigation">
                         <a class="active" href="/" target="_self"><i class="nav-icon">⌂</i>Home</a>
                         <a href="./about" target="_self"><i class="nav-icon">◉</i>About</a>
-                        <a href="./resources" target="_self"><i class="nav-icon">▤</i>Resources</a>
                         <a href="https://www.hyperneuronai.com/" target="_self"><i class="nav-icon">◇</i>Parent Website</a>
                         <a href="{review_href}" target="_self"><i class="nav-icon">→</i>Review Workspace</a>
                         {f'<a href="./projects" target="_self"><i class="nav-icon">▦</i>Projects</a>' if signed_in else ''}
@@ -1738,7 +1737,7 @@ def render_page_header(evaluation_started: bool) -> None:
             </section>
             <section class="mira-quick-pitch">
                 <h2 class="quick-pitch-title">One row. Multiple responses. <span>Human signal in minutes.</span></h2>
-                <div class="quick-pitch-copy"><p>Replace scattered spreadsheets with one evaluation flow that keeps context, ratings, reviewer decisions and final responses connected.</p><div class="pitch-actions"><a class="pitch-link" href="#workflow">See how it works</a><a class="pitch-link primary" href="{review_href}"><i>→</i> Start evaluation</a></div></div>
+                <div class="quick-pitch-copy"><p>Replace scattered spreadsheets with one evaluation space that keeps prompts, model outputs and human decisions connected.</p><div class="pitch-actions"><a class="pitch-link" href="#capabilities">Explore capabilities</a><a class="pitch-link primary" href="{review_href}"><i>→</i> Start evaluation</a></div></div>
             </section>
             <section id="evaluation-depth" class="story-section story-intro">
                 <div class="story-intro-copy"><div class="story-index">01 · Beneath the output</div><h2>Fluent is not the same as <em>right.</em></h2><p class="story-copy">A response can read beautifully and still miss intent, context or cultural nuance. MIRA separates the visible answer from the signals underneath, so reviewers can turn instinct into structured evidence.</p><div class="story-proof"><span>Compare responses</span><span>Expose hidden signals</span><span>Capture human judgment</span></div></div>
@@ -1757,31 +1756,12 @@ def render_page_header(evaluation_started: bool) -> None:
                     </div>
                 </div>
             </section>
-            <section class="story-numbers">
-                <div class="story-number"><strong>1–5</strong><span>one shared language for nuanced human judgment</span></div>
-                <div class="story-number"><strong>N-way</strong><span>compare every available model response in context</span></div>
-                <div class="story-number"><strong>Trace</strong><span>preserve the choice, final response and reviewer rationale</span></div>
-            </section>
-            <section class="blindspot-story">
-                <div class="blindspot-copy"><small>Subject 02 · Where quality disappears</small><h2>The hardest failures still sound confident.</h2><p>Automated metrics can measure similarity. Human reviewers notice whether an answer understood the person, respected the setting and earned its final score.</p><div class="blindspot-list"><div class="blindspot-item"><i>01</i><div><b>Intent drift</b><span>The response answers a nearby question instead of the real request.</span></div></div><div class="blindspot-item"><i>02</i><div><b>Language without belonging</b><span>The words are correct, but tone, style or cultural context feels wrong.</span></div></div><div class="blindspot-item"><i>03</i><div><b>Untraceable preference</b><span>A winner is chosen without preserving why it was better.</span></div></div></div></div>
-                <div class="decision-anatomy" aria-hidden="true"><div class="decision-ring"></div><div class="decision-core"><small>Human decision</small><b>Response B</b><span>selected with evidence</span></div><div class="decision-subject one"><b>Prompt intent</b><span>What did the user actually need?</span></div><div class="decision-subject two"><b>Response quality</b><span>Which answer holds up across signals?</span></div><div class="decision-subject three"><b>Reviewer rationale</b><span>Why should this choice be trusted?</span></div></div>
-            </section>
-            <section class="mira-bento">
+            <section id="capabilities" class="mira-bento">
                 <div class="bento-head"><h2>Everything a reviewer needs. Nothing they don’t.</h2><p>MIRA keeps the interface focused while preserving the depth required for serious model evaluation.</p></div>
                 <div class="bento-grid">
                     <article class="bento-card wide"><h3>Compare every response in context</h3><p>See multiple model outputs together, select the strongest answer and preserve an editable final response.</p><div class="bento-response-stack"><div class="bento-response"><b>Response A</b>Clear intent, relevant context, natural language.</div><div class="bento-response"><b>Response B · Selected</b>Stronger alignment with the user’s actual request.</div><div class="bento-response"><b>Final response</b>Reviewer-refined and ready for export.</div></div></article>
-                    <article class="bento-card"><h3>Structured ratings</h3><p>Capture consistent 1–5 quality signals per selected response column.</p><div class="rating-orbit"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i></div></article>
+                    <article class="bento-card"><h3>Configurable human signals</h3><p>Apply the review dimensions selected for the current evaluation project.</p><div class="rating-orbit"><i>•</i><i>•</i><i>•</i><i>•</i><i>•</i></div></article>
                     <article class="bento-card"><h3>Export-ready evidence</h3><p>Move from reviewed rows to clean data without rebuilding your work.</p><div class="export-flow"><span>Reviewed rows</span><i>→</i><span>CSV · XLSX</span></div></article>
-                </div>
-            </section>
-            <section id="workflow" class="story-section story-process">
-                <div class="story-index">02 · From raw output to trusted data</div>
-                <h2>Evaluation is a chain of human decisions.</h2>
-                <div class="process-line">
-                    <div class="process-step"><b>Upload</b><p>Bring CSV, Excel or Drive-hosted model outputs into one workspace.</p></div>
-                    <div class="process-step"><b>Map</b><p>Define the prompt, response columns and human-readable display labels.</p></div>
-                    <div class="process-step"><b>Evaluate</b><p>Compare responses, record criteria scores and refine the final answer.</p></div>
-                    <div class="process-step"><b>Export</b><p>Produce structured review data ready for analysis and model improvement.</p></div>
                 </div>
             </section>
             <section class="story-section story-closing">
@@ -2361,6 +2341,18 @@ def persist_review_draft(
     for column, key in criteria_widget_keys.items():
         rating = rating_from_scale(st.session_state.get(key))
         df_review.at[row_index, column] = rating if rating is not None else pd.NA
+    for source_column in st.session_state.get("criteria_target_columns", []):
+        ratings = []
+        for rating_column in RATING_COLUMNS:
+            output_column = dynamic_rating_column(source_column, rating_column)
+            widget_key = criteria_widget_keys.get(output_column)
+            rating = rating_from_scale(st.session_state.get(widget_key)) if widget_key else None
+            if rating is not None:
+                ratings.append(rating)
+        overall_column = f"{source_column}_overall_rating"
+        df_review.at[row_index, overall_column] = (
+            round(sum(ratings) / len(ratings), 2) if ratings else pd.NA
+        )
 
     source_name = st.session_state.get("loaded_file_name")
     if source_name:
@@ -2379,6 +2371,7 @@ def persist_review_draft(
 def review_workspace(force_llm: bool = False, mapping_only: bool = False):
     """Run the existing upload, mapping, and evaluation workflow."""
     st.markdown('<div class="workspace-page-marker"></div>', unsafe_allow_html=True)
+    selected_model_type = str(st.session_state.get("review_model_type", "LLM")).upper()
     if not force_llm:
         st.markdown('<div class="feature-page-marker"></div>', unsafe_allow_html=True)
     else:
@@ -2467,29 +2460,29 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
         if not force_llm:
             with st.container(key="feature_stage"):
                 st.markdown(
-                    """
+                    f"""
                     <div class="upload-section-head">
                         <div><i>✦</i><span><strong>Our review features</strong><small>Choose the evaluation workflow designed for your data.</small></span></div>
                     </div>
                     <div class="review-product-grid">
-                        <a class="review-product-card" href="./llm-review" target="_self">
+                        <a class="review-product-card" href="./llm-review?model_type=slm" target="_self">
                             <div class="review-product-card-inner">
                                 <div class="review-product-icon">◉</div>
-                                <h3>SLM / LLM Data Review</h3>
-                                <p>Compare model responses and turn human judgment into structured evaluation data.</p>
+                                <h3>SLM Data Review</h3>
+                                <p>Evaluate compact and domain-focused model responses with structured human judgment.</p>
                                 <ul><li>Multiple response comparison</li><li>Context, language, emotion and safety ratings</li><li>Editable final response</li><li>Reviewed dataset export</li></ul>
-                                <span class="review-product-action">Open Review Workspace →</span>
+                                <span class="review-product-action">Open SLM Review →</span>
                             </div>
                         </a>
-                        <div class="review-product-card coming-soon">
+                        <a class="review-product-card" href="./llm-review?model_type=llm" target="_self">
                             <div class="review-product-card-inner">
-                                <div class="review-product-icon">≋</div>
-                                <h3>TTS Data Review</h3>
-                                <p>Evaluate generated and recorded speech with a human-centered audio review workflow.</p>
-                                <ul><li>Audio and transcript alignment</li><li>Pronunciation and naturalness</li><li>Voice quality assessment</li><li>Emotion and delivery review</li></ul>
-                                <span class="review-product-action">Coming Soon</span>
+                                <div class="review-product-icon">◇</div>
+                                <h3>LLM Data Review</h3>
+                                <p>Compare general-purpose model outputs and preserve reviewer decisions row by row.</p>
+                                <ul><li>Multiple response comparison</li><li>Configurable rating targets</li><li>Editable final response</li><li>Reviewed dataset export</li></ul>
+                                <span class="review-product-action">Open LLM Review →</span>
                             </div>
-                        </div>
+                        </a>
                     </div>
                     """,
                     unsafe_allow_html=True,
@@ -2498,9 +2491,9 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
         if force_llm:
             with st.container(key="upload_stage"):
                 st.markdown(
-                    """
+                    f"""
                     <div class="upload-section-head">
-                        <div><i>⇧</i><span><strong>Upload your dataset</strong><small>Choose where your evaluation data lives.</small></span></div>
+                        <div><i>⇧</i><span><strong>Upload your {selected_model_type} dataset</strong><small>Choose where your evaluation data lives.</small></span></div>
                         <span class="upload-format-pills"><span>CSV</span><span>XLSX</span><span>XLS</span></span>
                     </div>
                     <div class="review-feature-note">Compare model responses, apply human ratings, edit the final answer, and export structured review data.</div>
@@ -2678,11 +2671,31 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
         )
 
         if not st.session_state.evaluation_column_slots:
-            default_evaluation_columns = [
+            non_prompt_columns = [
                 column
                 for column in available_columns
                 if column != suggested_prompt_column
             ]
+            excluded_response_terms = {
+                "comment", "comments", "note", "notes", "review", "reviewer",
+                "category", "problem", "label", "status", "id", "index",
+            }
+            response_terms = (
+                "assistant", "response", "answer", "chosen", "rejected",
+                "gemma", "chatgpt", "model", "output", "completion",
+            )
+            likely_response_columns = [
+                column
+                for column in non_prompt_columns
+                if any(term in str(column).strip().lower() for term in response_terms)
+                and not any(term in str(column).strip().lower() for term in excluded_response_terms)
+            ]
+            fallback_response_columns = [
+                column
+                for column in non_prompt_columns
+                if not any(term in str(column).strip().lower() for term in excluded_response_terms)
+            ]
+            default_evaluation_columns = likely_response_columns or fallback_response_columns[:2]
             st.session_state.evaluation_column_slots = list(
                 range(len(default_evaluation_columns))
             )
@@ -2693,6 +2706,7 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
 
         response_columns = []
         response_display_names = []
+        st.caption("Select only model-output columns that reviewers should compare. Comment, note, category and metadata columns are not selected automatically.")
         for column_number, slot_id in enumerate(
             st.session_state.evaluation_column_slots,
             start=1,
@@ -2701,7 +2715,7 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
             mapping_row = st.columns([8, 1])
             with mapping_row[0]:
                 response_column = st.selectbox(
-                    f"Column {column_number}",
+                    f"Response column {column_number}",
                     options=column_options,
                     index=(
                         column_options.index(default_column)
@@ -2734,13 +2748,14 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
         ]
         criteria_target_columns = st.multiselect(
             "Apply Review Criteria to columns",
-            options=available_columns,
+            options=default_criteria_targets,
             default=default_criteria_targets,
             format_func=str,
             key="criteria_target_columns_widget",
             on_change=reset_column_confirmation,
             help="Choose every uploaded-file column that should receive separate star ratings.",
         )
+        st.caption("Beta note: review dimensions are provisional and can change as the evaluation framework is finalised.")
 
         def validate_mapping() -> list[str]:
             errors = []
@@ -2893,7 +2908,6 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
     choice_options = [
         *response_values.keys(),
         "All responses are bad",
-        "Reviewer notes",
     ]
 
     # Set defaults based on existing data.
@@ -2906,6 +2920,7 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
     # Put choice in a stable session key per index so switching rows restores state.
     choice_key = f"choice_{idx}"
     notes_key = f"notes_{idx}"
+    show_notes_key = f"show_notes_{idx}"
     final_key = f"final_{idx}"
     radio_key = f"{choice_key}_radio"
     row_index = df_review.index[idx]
@@ -2925,6 +2940,8 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
         st.session_state[choice_key] = default_choice
     if notes_key not in st.session_state:
         st.session_state[notes_key] = existing_notes
+    if show_notes_key not in st.session_state:
+        st.session_state[show_notes_key] = bool(existing_notes.strip())
     if final_key not in st.session_state:
         if is_reviewed:
             st.session_state[final_key] = existing_final
@@ -3002,14 +3019,30 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
                             label,
                             criteria_widget_keys[output_column],
                         )
+                    completed_ratings = [
+                        rating_values[dynamic_rating_column(source_column, rating_column)]
+                        for rating_column in RATING_COLUMNS
+                        if rating_values.get(dynamic_rating_column(source_column, rating_column)) is not None
+                    ]
+                    overall_rating = (
+                        round(sum(completed_ratings) / len(completed_ratings), 2)
+                        if completed_ratings
+                        else None
+                    )
+                    overall_column = f"{source_column}_overall_rating"
+                    st.session_state.df_review.at[row_index, overall_column] = (
+                        overall_rating if overall_rating is not None else pd.NA
+                    )
+                    st.metric("Overall rating", f"{overall_rating:.2f} / 5" if overall_rating is not None else "Not rated")
 
-    st.markdown("#### Choose the better response")
+    st.markdown("#### Select the best response")
+    st.caption("Choose the response that should be copied into the editable final response field. Select ‘All responses are bad’ only when none is usable.")
     selected_choice = st.radio(
-        "Selection",
+        "Response to use",
         options=choice_options,
         index=choice_options.index(st.session_state[radio_key]),
         key=radio_key,
-        help="Select the best response column or indicate that manual editing is needed.",
+        help="Select one mapped response, or reject all available responses.",
         on_change=persist_review_draft,
         args=draft_callback_args,
         label_visibility="collapsed",
@@ -3024,7 +3057,11 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
     )
 
     reviewer_notes = display_text(st.session_state.get(notes_key, ""))
-    if selected_choice == "Reviewer notes":
+    add_reviewer_notes = st.checkbox(
+        "Add reviewer notes (optional)",
+        key=show_notes_key,
+    )
+    if add_reviewer_notes:
         reviewer_notes = st.text_area(
             "Reviewer notes",
             height=120,
@@ -3036,14 +3073,13 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
 
     # Save button
     save_disabled = False
-    if selected_choice != "All responses are bad" and not display_text(final_response_text).strip() and selected_choice != "Reviewer notes":
-        # Empty output is valid only when all responses are rejected or reviewer notes are used.
-        # But also enforce reasonable validation for automatic choices.
+    if selected_choice != "All responses are bad" and not display_text(final_response_text).strip():
+        # Empty output is valid only when all responses are rejected.
         save_disabled = True
 
     if st.button("Save current row", type="primary", disabled=save_disabled):
         # Validation
-        if selected_choice not in {"All responses are bad", "Reviewer notes"} and not display_text(final_response_text).strip():
+        if selected_choice != "All responses are bad" and not display_text(final_response_text).strip():
             st.error("Final response should not be empty for the selected response column.")
             return
 
@@ -3226,7 +3262,6 @@ def render_inner_navigation(active_page: str) -> None:
     review_href = "./review" if signed_in else "./account"
     home_active = " active" if active_page == "home" else ""
     about_active = " active" if active_page == "about" else ""
-    resources_active = " active" if active_page == "resources" else ""
     account_active = " active" if active_page == "account" else ""
     review_active = " active" if active_page == "review" else ""
     projects_active = " active" if active_page == "projects" else ""
@@ -3237,7 +3272,7 @@ def render_inner_navigation(active_page: str) -> None:
         account_navigation = f"""<div class="nav-account-menu"><a class="nav-user-avatar{account_active}" href="./account" target="_self" aria-label="Open account menu">{nav_user_initial}</a><div class="nav-account-dropdown"><div class="nav-account-identity"><strong>{nav_user_name}</strong><span>{nav_user_email}</span></div><a href="./account" target="_self">Account settings</a><a class="sign-out" href="./logout" target="_self">Sign out</a></div></div>"""
     else:
         account_navigation = f'<a class="{account_active.strip()}" href="./account" target="_self">Account</a>'
-    st.markdown(
+    navigation_markup = dedent(
         f"""
         <header class="inner-site-header">
             <div class="news-top">
@@ -3245,7 +3280,6 @@ def render_inner_navigation(active_page: str) -> None:
                 <nav class="news-nav" aria-label="Primary navigation">
                     <a class="{home_active.strip()}" href="/" target="_self"><i class="nav-icon">⌂</i>Home</a>
                     <a class="{about_active.strip()}" href="./about" target="_self"><i class="nav-icon">◉</i>About</a>
-                    <a class="{resources_active.strip()}" href="./resources" target="_self"><i class="nav-icon">▤</i>Resources</a>
                     <a href="https://www.hyperneuronai.com/" target="_self"><i class="nav-icon">◇</i>Parent Website</a>
                     <a class="{review_active.strip()}" href="{review_href}" target="_self"><i class="nav-icon">→</i>Review Workspace</a>
                     {f'<a class="{projects_active.strip()}" href="./projects" target="_self"><i class="nav-icon">▦</i>Projects</a>' if signed_in else ''}
@@ -3253,7 +3287,11 @@ def render_inner_navigation(active_page: str) -> None:
                 <div class="news-actions">{account_navigation}</div>
             </div>
         </header>
-        """,
+        """
+    ).strip()
+    navigation_markup = "".join(line.strip() for line in navigation_markup.splitlines())
+    st.markdown(
+        navigation_markup,
         unsafe_allow_html=True,
     )
 
@@ -3380,20 +3418,6 @@ def about_page():
     render_site_footer()
 
 
-def resources_page():
-    """Render practical reviewer guidance as a dedicated product page."""
-    st.markdown('<div class="resources-page-marker"></div>', unsafe_allow_html=True)
-    render_inner_navigation("resources")
-    st.markdown(
-        """
-        <section class="resources-hero"><small>MIRA reviewer resources</small><h1>Better judgment starts with a shared standard.</h1><p>Use these practical guides to evaluate model responses consistently, preserve reviewer reasoning and turn human preferences into reliable training or quality data.</p></section>
-        <section class="resource-library"><div class="about-section-heading"><div><small>Evaluation library</small><h2>What to look for in every response.</h2></div><p>Each guide focuses attention on a different layer of response quality while keeping the final decision connected to the user’s actual request.</p></div><div class="resource-grid"><article class="resource-card"><small>Guide 01</small><h3>Context and relevance</h3><p>Check whether the response follows the real instruction, addresses every important part and avoids drifting toward a nearby but different question.</p><div class="resource-tags"><span>Intent</span><span>Completeness</span><span>Instruction adherence</span></div></article><article class="resource-card"><small>Guide 02</small><h3>Language alignment</h3><p>Evaluate language match, naturalness, conversational register and whether English, Hindi or Hinglish feels appropriate for the user.</p><div class="resource-tags"><span>Language match</span><span>Tone</span><span>Indic nuance</span></div></article><article class="resource-card"><small>Guide 03</small><h3>Emotion and expression</h3><p>Review whether emotional expression supports the message naturally instead of feeling absent, excessive or awkwardly inserted.</p><div class="resource-tags"><span>EmotionX</span><span>Empathy</span><span>Natural expression</span></div></article><article class="resource-card"><small>Guide 04</small><h3>Safety and domain care</h3><p>Flag potentially unsafe claims and treat confident financial statements carefully. Safety remains a basic review placeholder in the current workflow.</p><div class="resource-tags"><span>Potential risk</span><span>BFSI care</span><span>Reviewer notes</span></div></article></div><div class="about-section-heading" style="margin-top:5rem"><div><small>Shared scoring language</small><h2>The MIRA 1–5 scale.</h2></div><p>Use the full scale consistently. Ratings should reflect the selected criterion, supported by reviewer notes when an issue needs explanation.</p></div><div class="rating-guide"><div><b>1</b><span>Very poor</span></div><div><b>2</b><span>Poor</span></div><div><b>3</b><span>Average</span></div><div><b>4</b><span>Good</span></div><div><b>5</b><span>Excellent</span></div></div></section>
-        """,
-        unsafe_allow_html=True,
-    )
-    render_site_footer()
-
-
 def google_auth_configured() -> bool:
     """Return whether the required Google OIDC settings are available."""
     try:
@@ -3470,6 +3494,9 @@ def protected_llm_review_workspace():
         )
         st.info("Sign in is required. Redirecting you to the login page…")
         st.stop()
+    requested_model_type = str(st.query_params.get("model_type", "")).strip().lower()
+    if requested_model_type in {"slm", "llm"}:
+        st.session_state.review_model_type = requested_model_type.upper()
     # This route is the step immediately before column mapping/evaluation.
     # When browser Back returns here, leave the evaluation view instead of
     # rendering the same Progress screen again. The loaded dataset, ratings,
@@ -3531,7 +3558,6 @@ def run_app():
             COLUMN_MAPPING_PAGE,
             st.Page(projects_page, title="Projects", icon=":material/folder_open:", url_path="projects"),
             st.Page(about_page, title="About", icon=":material/info:", url_path="about"),
-            st.Page(resources_page, title="Resources", icon=":material/menu_book:", url_path="resources"),
             st.Page(account_page, title="Account", icon=":material/account_circle:", url_path="account"),
             st.Page(logout_page, title="Sign out", icon=":material/logout:", url_path="logout"),
         ]
@@ -3543,7 +3569,6 @@ def run_app():
             COLUMN_MAPPING_PAGE,
             st.Page(projects_page, title="Projects", icon=":material/lock:", url_path="projects"),
             st.Page(about_page, title="About", icon=":material/info:", url_path="about"),
-            st.Page(resources_page, title="Resources", icon=":material/menu_book:", url_path="resources"),
             st.Page(account_page, title="Sign in", icon=":material/login:", url_path="account"),
             st.Page(logout_page, title="Sign out", icon=":material/logout:", url_path="logout"),
         ]
