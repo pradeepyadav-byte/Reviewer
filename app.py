@@ -1559,6 +1559,51 @@ def inject_app_theme() -> None:
             box-shadow: 0 7px 16px rgba(109, 93, 252, 0.3);
         }
 
+        /* Give every response's review criteria a distinct paper shade. */
+        div[class*="st-key-criteria_paper_"] div[data-testid="stVerticalBlockBorderWrapper"] {
+            position: relative;
+            overflow: visible;
+            min-height: 100%;
+            border: 1px solid rgba(45, 57, 72, 0.18) !important;
+            border-radius: 5px 16px 7px 13px !important;
+            box-shadow: 0 13px 26px rgba(31, 42, 68, 0.12), 0 2px 3px rgba(31, 42, 68, 0.08);
+            background-color: var(--criteria-paper, #dff1f5) !important;
+            background-image:
+                linear-gradient(90deg, transparent 0 2rem, rgba(211, 91, 91, 0.14) 2rem 2.08rem, transparent 2.08rem),
+                repeating-linear-gradient(0deg, transparent 0 31px, rgba(57, 76, 96, 0.075) 31px 32px) !important;
+            transform: rotate(var(--criteria-tilt, -0.35deg));
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        div[class*="st-key-criteria_paper_"] div[data-testid="stVerticalBlockBorderWrapper"]::after {
+            content: "";
+            position: absolute;
+            z-index: 2;
+            right: -1px;
+            bottom: -1px;
+            width: 28px;
+            height: 28px;
+            pointer-events: none;
+            clip-path: polygon(100% 0, 0 100%, 100% 100%);
+            background: linear-gradient(135deg, rgba(255,255,255,.74), rgba(89,102,120,.14));
+            filter: drop-shadow(-2px -2px 2px rgba(31,42,68,.08));
+        }
+
+        div[class*="st-key-criteria_paper_"] div[data-testid="stVerticalBlockBorderWrapper"]:hover {
+            z-index: 3;
+            transform: rotate(0deg) translateY(-5px);
+            box-shadow: 0 19px 34px rgba(31, 42, 68, 0.17), 0 3px 5px rgba(31, 42, 68, 0.1);
+        }
+
+        .st-key-criteria_paper_0 { --criteria-paper:#dff1f5; --criteria-tilt:-0.45deg; }
+        .st-key-criteria_paper_1 { --criteria-paper:#f8ddd7; --criteria-tilt:0.45deg; }
+        .st-key-criteria_paper_2 { --criteria-paper:#dff2e8; --criteria-tilt:-0.3deg; }
+        .st-key-criteria_paper_3 { --criteria-paper:#f8efc9; --criteria-tilt:0.35deg; }
+        .st-key-criteria_paper_4 { --criteria-paper:#e8e1f6; --criteria-tilt:-0.4deg; }
+        .st-key-criteria_paper_5 { --criteria-paper:#f5dfc9; --criteria-tilt:0.4deg; }
+        .st-key-criteria_paper_6 { --criteria-paper:#dce9f8; --criteria-tilt:-0.25deg; }
+        .st-key-criteria_paper_7 { --criteria-paper:#f3dfea; --criteria-tilt:0.3deg; }
+
         ::-webkit-scrollbar { width: 10px; height: 10px; }
         ::-webkit-scrollbar-track { background: #eef1f7; }
         ::-webkit-scrollbar-thumb {
@@ -1577,6 +1622,7 @@ def inject_app_theme() -> None:
 
         @media (max-width: 760px) {
             .block-container { padding-left: 1rem; padding-right: 1rem; }
+            div[class*="st-key-criteria_paper_"] div[data-testid="stVerticalBlockBorderWrapper"] { transform:none; }
             div[data-testid="stMarkdownContainer"]:has(> .inner-site-header) { min-height:142px; }
             .inner-site-header { position:relative !important; left:auto; right:auto; top:auto; display:block !important; width:100%; max-width:100%; height:auto; min-height:132px; margin:.35rem 0 1rem !important; padding:.45rem !important; overflow:hidden; border:1px solid rgba(21,31,36,.08); border-radius:20px; background:rgba(255,255,255,.97); box-shadow:0 12px 30px rgba(21,31,36,.1); }
             .inner-site-header::before { display:none; }
@@ -1740,14 +1786,14 @@ def render_page_header(evaluation_started: bool) -> None:
 
     auth_ready = google_auth_configured()
     signed_in = auth_ready and bool(getattr(st.user, "is_logged_in", False))
-    review_href = "./review" if signed_in else "./account"
+    review_href = "/review" if signed_in else "/account"
     if signed_in:
         nav_user_name = escape(str(getattr(st.user, "name", None) or "Google user"))
         nav_user_email = escape(str(getattr(st.user, "email", None) or ""))
         nav_user_initial = (nav_user_name.strip()[:1] or nav_user_email.strip()[:1] or "G").upper()
-        account_navigation = f"""<div class="nav-account-menu"><a class="nav-user-avatar" href="./account" target="_self" aria-label="Open account menu">{nav_user_initial}</a><div class="nav-account-dropdown"><div class="nav-account-identity"><strong>{nav_user_name}</strong><span>{nav_user_email}</span></div><a href="./account" target="_self">Account settings</a><a class="sign-out" href="./logout" target="_self">Sign out</a></div></div>"""
+        account_navigation = f"""<div class="nav-account-menu"><a class="nav-user-avatar" href="/account" target="_self" aria-label="Open account menu">{nav_user_initial}</a><div class="nav-account-dropdown"><div class="nav-account-identity"><strong>{nav_user_name}</strong><span>{nav_user_email}</span></div><a href="/account" target="_self">Account settings</a><a class="sign-out" href="/logout" target="_self">Sign out</a></div></div>"""
     else:
-        account_navigation = '<a href="./account" target="_self">Account</a>'
+        account_navigation = '<a href="/account" target="_self">Account</a>'
 
     landing_markup = dedent(
         f"""
@@ -1757,10 +1803,10 @@ def render_page_header(evaluation_started: bool) -> None:
                     <a class="news-brand" href="/" target="_self" aria-label="MIRA home"><span class="news-brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>MIRA</span></a>
                     <nav class="news-nav" aria-label="Primary navigation">
                         <a class="active" href="/" target="_self"><i class="nav-icon">⌂</i>Home</a>
-                        <a href="./about" target="_self"><i class="nav-icon">◉</i>About</a>
+                        <a href="/about" target="_self"><i class="nav-icon">◉</i>About</a>
                         <a href="https://www.hyperneuronai.com/" target="_self"><i class="nav-icon">◇</i>Parent Website</a>
                         <a href="{review_href}" target="_self"><i class="nav-icon">→</i>Review Workspace</a>
-                        {f'<a href="./projects" target="_self"><i class="nav-icon">▦</i>Projects</a>' if signed_in else ''}
+                        {f'<a href="/projects" target="_self"><i class="nav-icon">▦</i>Projects</a>' if signed_in else ''}
                     </nav>
                     <div class="news-actions">{account_navigation}</div>
                 </div>
@@ -2481,7 +2527,7 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
                         <div><i>✦</i><span><strong>Our review features</strong><small>Choose the evaluation workflow designed for your data.</small></span></div>
                     </div>
                     <div class="review-product-grid">
-                        <a class="review-product-card" href="./llm-review?model_type=slm" target="_self">
+                        <a class="review-product-card" href="/llm-review?model_type=slm" target="_self">
                             <div class="review-product-card-inner">
                                 <div class="review-product-icon">◉</div>
                                 <h3>SLM Data Review</h3>
@@ -2490,7 +2536,7 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
                                 <span class="review-product-action">Open SLM Review →</span>
                             </div>
                         </a>
-                        <a class="review-product-card" href="./llm-review?model_type=llm" target="_self">
+                        <a class="review-product-card" href="/llm-review?model_type=llm" target="_self">
                             <div class="review-product-card-inner">
                                 <div class="review-product-icon">◇</div>
                                 <h3>LLM Data Review</h3>
@@ -3023,7 +3069,10 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
                 st.session_state.column_display_names.get(source_column, str(source_column)),
             )
             with review_columns[target_index]:
-                with st.container(border=True):
+                with st.container(
+                    border=True,
+                    key=f"criteria_paper_{target_index % 8}",
+                ):
                     st.markdown(f"#### Review criteria: {display_name}")
                     for rating_column, label in RATING_COLUMNS.items():
                         output_column = dynamic_rating_column(source_column, rating_column)
@@ -3246,7 +3295,7 @@ def render_site_footer() -> None:
         <footer class="site-footer">
             <a class="site-footer-brand" href="/" target="_self" aria-label="Go to MIRA home"><i></i> MIRA</a>
             <div>Built for thoughtful human evaluation, not endless spreadsheets.</div>
-            <div class="site-footer-links"><a href="./account" target="_self">Account</a><a href="./about" target="_self">About</a><a href="https://www.hyperneuronai.com/" target="_self">HyperNeuron ↗</a></div>
+            <div class="site-footer-links"><a href="/account" target="_self">Account</a><a href="/about" target="_self">About</a><a href="https://www.hyperneuronai.com/" target="_self">HyperNeuron ↗</a></div>
         </footer>
         """
     )
@@ -3255,7 +3304,7 @@ def render_site_footer() -> None:
 def render_inner_navigation(active_page: str, back_href: str = "/") -> None:
     """Render consistent navigation across secondary product pages."""
     signed_in = google_auth_configured() and bool(getattr(st.user, "is_logged_in", False))
-    review_href = "./review" if signed_in else "./account"
+    review_href = "/review" if signed_in else "/account"
     home_active = " active" if active_page == "home" else ""
     about_active = " active" if active_page == "about" else ""
     account_active = " active" if active_page == "account" else ""
@@ -3265,9 +3314,9 @@ def render_inner_navigation(active_page: str, back_href: str = "/") -> None:
         nav_user_name = escape(str(getattr(st.user, "name", None) or "Google user"))
         nav_user_email = escape(str(getattr(st.user, "email", None) or ""))
         nav_user_initial = (nav_user_name.strip()[:1] or nav_user_email.strip()[:1] or "G").upper()
-        account_navigation = f"""<div class="nav-account-menu"><a class="nav-user-avatar{account_active}" href="./account" target="_self" aria-label="Open account menu">{nav_user_initial}</a><div class="nav-account-dropdown"><div class="nav-account-identity"><strong>{nav_user_name}</strong><span>{nav_user_email}</span></div><a href="./account" target="_self">Account settings</a><a class="sign-out" href="./logout" target="_self">Sign out</a></div></div>"""
+        account_navigation = f"""<div class="nav-account-menu"><a class="nav-user-avatar{account_active}" href="/account" target="_self" aria-label="Open account menu">{nav_user_initial}</a><div class="nav-account-dropdown"><div class="nav-account-identity"><strong>{nav_user_name}</strong><span>{nav_user_email}</span></div><a href="/account" target="_self">Account settings</a><a class="sign-out" href="/logout" target="_self">Sign out</a></div></div>"""
     else:
-        account_navigation = f'<a class="{account_active.strip()}" href="./account" target="_self">Account</a>'
+        account_navigation = f'<a class="{account_active.strip()}" href="/account" target="_self">Account</a>'
     navigation_markup = dedent(
         f"""
         <header class="inner-site-header">
@@ -3276,10 +3325,10 @@ def render_inner_navigation(active_page: str, back_href: str = "/") -> None:
                 <a class="news-brand" href="/" target="_self" aria-label="MIRA home"><span class="news-brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>MIRA</span></a>
                 <nav class="news-nav" aria-label="Primary navigation">
                     <a class="{home_active.strip()}" href="/" target="_self"><i class="nav-icon">⌂</i>Home</a>
-                    <a class="{about_active.strip()}" href="./about" target="_self"><i class="nav-icon">◉</i>About</a>
+                    <a class="{about_active.strip()}" href="/about" target="_self"><i class="nav-icon">◉</i>About</a>
                     <a href="https://www.hyperneuronai.com/" target="_self"><i class="nav-icon">◇</i>Parent Website</a>
                     <a class="{review_active.strip()}" href="{review_href}" target="_self"><i class="nav-icon">→</i>Review Workspace</a>
-                    {f'<a class="{projects_active.strip()}" href="./projects" target="_self"><i class="nav-icon">▦</i>Projects</a>' if signed_in else ''}
+                    {f'<a class="{projects_active.strip()}" href="/projects" target="_self"><i class="nav-icon">▦</i>Projects</a>' if signed_in else ''}
                 </nav>
                 <div class="news-actions">{account_navigation}</div>
             </div>
@@ -3447,7 +3496,7 @@ def account_page():
                     render_safe_html(
                         f'<div class="signed-user"><div class="signed-avatar">{initial}</div><div><strong>{user_name}</strong><span>{user_email}</span></div></div>'
                     )
-                    render_safe_html('<a class="auth-route-link primary" href="./review">Continue to Review Workspace →</a>')
+                    render_safe_html('<a class="auth-route-link primary" href="/review">Continue to Review Workspace →</a>')
                     st.button("Sign out", on_click=st.logout, width="stretch")
                 elif configured:
                     st.button("Continue with Google", type="primary", icon=":material/login:", on_click=st.login, width="stretch")
