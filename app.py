@@ -8,6 +8,7 @@ import tempfile
 from datetime import datetime, timezone
 from textwrap import dedent
 from typing import Optional
+from urllib.parse import urlparse
 
 import pandas as pd
 import streamlit as st
@@ -3598,6 +3599,17 @@ def google_auth_configured() -> bool:
 
 def account_page():
     """Provide Google OIDC sign-in and signed-in account controls."""
+    # Streamlit can retain the previously selected callable while its SPA shell
+    # restores the root URL. Keep the public landing page and the authentication
+    # page canonical so browser history, refresh, and OAuth return navigation do
+    # not leave the Account UI rendered at `/`.
+    current_path = urlparse(str(getattr(st.context, "url", ""))).path.rstrip("/")
+    if current_path != "/account":
+        st.components.v1.html(
+            """<script>window.parent.location.replace(window.parent.location.origin + '/account');</script>""",
+            height=0,
+        )
+        st.stop()
     configured = google_auth_configured()
     logged_in = configured and bool(getattr(st.user, "is_logged_in", False))
     st.markdown('<div class="auth-page-marker"></div>', unsafe_allow_html=True)
