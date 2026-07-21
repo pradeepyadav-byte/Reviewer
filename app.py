@@ -1539,23 +1539,37 @@ def inject_app_theme() -> None:
             box-shadow: 0 7px 16px rgba(109, 93, 252, 0.3);
         }
 
-        /* Give every response's review criteria a distinct paper shade. */
-        div[class*="st-key-criteria_paper_"] div[data-testid="stVerticalBlockBorderWrapper"] {
+        /* Each individual review criterion is a separate colored paper sheet. */
+        div[class*="st-key-criterion_sheet_"] div[data-testid="stVerticalBlockBorderWrapper"] {
             position: relative;
             overflow: visible;
-            min-height: 100%;
-            border: 1px solid rgba(45, 57, 72, 0.18) !important;
-            border-radius: 5px 16px 7px 13px !important;
-            box-shadow: 0 13px 26px rgba(31, 42, 68, 0.12), 0 2px 3px rgba(31, 42, 68, 0.08);
+            margin: .35rem 0 .8rem;
+            padding: .85rem 1rem .55rem 1.15rem;
+            border: 1px solid rgba(45, 57, 72, 0.2) !important;
+            border-radius: 4px 14px 6px 11px !important;
+            box-shadow: 0 9px 18px rgba(31, 42, 68, 0.11), 0 2px 3px rgba(31, 42, 68, 0.07);
             background-color: var(--criteria-paper, #dff1f5) !important;
             background-image:
-                linear-gradient(90deg, transparent 0 2rem, rgba(211, 91, 91, 0.14) 2rem 2.08rem, transparent 2.08rem),
-                repeating-linear-gradient(0deg, transparent 0 31px, rgba(57, 76, 96, 0.075) 31px 32px) !important;
-            transform: rotate(var(--criteria-tilt, -0.35deg));
+                linear-gradient(90deg, transparent 0 1.65rem, rgba(211, 91, 91, 0.13) 1.65rem 1.72rem, transparent 1.72rem),
+                repeating-linear-gradient(0deg, transparent 0 28px, rgba(57, 76, 96, 0.07) 28px 29px) !important;
+            transform: rotate(var(--criteria-tilt, -0.2deg));
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        div[class*="st-key-criteria_paper_"] div[data-testid="stVerticalBlockBorderWrapper"]::after {
+        div[class*="st-key-criterion_sheet_"] div[data-testid="stVerticalBlockBorderWrapper"]::before {
+            content: "";
+            position: absolute;
+            left: .45rem;
+            top: .72rem;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.78);
+            border: 1px solid rgba(50,64,80,.18);
+            box-shadow: 0 31px 0 rgba(255,255,255,.72), 0 62px 0 rgba(255,255,255,.66);
+        }
+
+        div[class*="st-key-criterion_sheet_"] div[data-testid="stVerticalBlockBorderWrapper"]::after {
             content: "";
             position: absolute;
             z-index: 2;
@@ -1569,20 +1583,20 @@ def inject_app_theme() -> None:
             filter: drop-shadow(-2px -2px 2px rgba(31,42,68,.08));
         }
 
-        div[class*="st-key-criteria_paper_"] div[data-testid="stVerticalBlockBorderWrapper"]:hover {
+        div[class*="st-key-criterion_sheet_"] div[data-testid="stVerticalBlockBorderWrapper"]:hover {
             z-index: 3;
-            transform: rotate(0deg) translateY(-5px);
-            box-shadow: 0 19px 34px rgba(31, 42, 68, 0.17), 0 3px 5px rgba(31, 42, 68, 0.1);
+            transform: rotate(0deg) translateY(-3px);
+            box-shadow: 0 14px 25px rgba(31, 42, 68, 0.16), 0 3px 5px rgba(31, 42, 68, 0.09);
         }
 
-        .st-key-criteria_paper_0 { --criteria-paper:#dff1f5; --criteria-tilt:-0.45deg; }
-        .st-key-criteria_paper_1 { --criteria-paper:#f8ddd7; --criteria-tilt:0.45deg; }
-        .st-key-criteria_paper_2 { --criteria-paper:#dff2e8; --criteria-tilt:-0.3deg; }
-        .st-key-criteria_paper_3 { --criteria-paper:#f8efc9; --criteria-tilt:0.35deg; }
-        .st-key-criteria_paper_4 { --criteria-paper:#e8e1f6; --criteria-tilt:-0.4deg; }
-        .st-key-criteria_paper_5 { --criteria-paper:#f5dfc9; --criteria-tilt:0.4deg; }
-        .st-key-criteria_paper_6 { --criteria-paper:#dce9f8; --criteria-tilt:-0.25deg; }
-        .st-key-criteria_paper_7 { --criteria-paper:#f3dfea; --criteria-tilt:0.3deg; }
+        div[class*="st-key-criterion_sheet_0_"] { --criteria-paper:#dff1f5; --criteria-tilt:-0.25deg; }
+        div[class*="st-key-criterion_sheet_1_"] { --criteria-paper:#f8ddd7; --criteria-tilt:0.25deg; }
+        div[class*="st-key-criterion_sheet_2_"] { --criteria-paper:#dff2e8; --criteria-tilt:-0.18deg; }
+        div[class*="st-key-criterion_sheet_3_"] { --criteria-paper:#f8efc9; --criteria-tilt:0.2deg; }
+        div[class*="st-key-criterion_sheet_4_"] { --criteria-paper:#e8e1f6; --criteria-tilt:-0.22deg; }
+        div[class*="st-key-criterion_sheet_5_"] { --criteria-paper:#f5dfc9; --criteria-tilt:0.22deg; }
+        div[class*="st-key-criterion_sheet_6_"] { --criteria-paper:#dce9f8; --criteria-tilt:-0.16deg; }
+        div[class*="st-key-criterion_sheet_7_"] { --criteria-paper:#f3dfea; --criteria-tilt:0.18deg; }
 
         ::-webkit-scrollbar { width: 10px; height: 10px; }
         ::-webkit-scrollbar-track { background: #eef1f7; }
@@ -1602,7 +1616,7 @@ def inject_app_theme() -> None:
 
         @media (max-width: 760px) {
             .block-container { padding-left: 1rem; padding-right: 1rem; }
-            div[class*="st-key-criteria_paper_"] div[data-testid="stVerticalBlockBorderWrapper"] { transform:none; }
+            div[class*="st-key-criterion_sheet_"] div[data-testid="stVerticalBlockBorderWrapper"] { transform:none; }
             div[data-testid="stMarkdownContainer"]:has(> .inner-site-header) { min-height:142px; }
             .inner-site-header { position:relative !important; left:auto; right:auto; top:auto; display:block !important; width:100%; max-width:100%; height:auto; min-height:132px; margin:.35rem 0 1rem !important; padding:.45rem !important; overflow:hidden; border:1px solid rgba(21,31,36,.08); border-radius:20px; background:rgba(255,255,255,.97); box-shadow:0 12px 30px rgba(21,31,36,.1); }
             .inner-site-header::before { display:none; }
@@ -3054,12 +3068,18 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
                     key=f"criteria_paper_{target_index % 8}",
                 ):
                     st.markdown(f"#### Review criteria: {display_name}")
-                    for rating_column, label in RATING_COLUMNS.items():
+                    for criterion_index, (rating_column, label) in enumerate(
+                        RATING_COLUMNS.items()
+                    ):
                         output_column = dynamic_rating_column(source_column, rating_column)
-                        rating_values[output_column] = scale_rating(
-                            label,
-                            criteria_widget_keys[output_column],
-                        )
+                        with st.container(
+                            border=True,
+                            key=f"criterion_sheet_{criterion_index % 8}_{target_index}",
+                        ):
+                            rating_values[output_column] = scale_rating(
+                                label,
+                                criteria_widget_keys[output_column],
+                            )
 
     st.markdown("#### Select the best response")
     st.caption("Choose the response that should be copied into the editable final response field. Select ‘All responses are bad’ only when none is usable.")
