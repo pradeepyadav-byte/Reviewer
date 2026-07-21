@@ -1913,22 +1913,22 @@ def render_page_header(evaluation_started: bool) -> None:
         nav_user_name = escape(str(getattr(st.user, "name", None) or "Google user"))
         nav_user_email = escape(str(getattr(st.user, "email", None) or ""))
         nav_user_initial = (nav_user_name.strip()[:1] or nav_user_email.strip()[:1] or "G").upper()
-        account_navigation = f"""<div class="nav-account-menu"><a class="nav-user-avatar" href="/account" target="_self" aria-label="Open account menu">{nav_user_initial}</a><div class="nav-account-dropdown"><div class="nav-account-identity"><strong>{nav_user_name}</strong><span>{nav_user_email}</span></div><a href="/account" target="_self">Account settings</a><a class="sign-out" href="/logout" target="_self">Sign out</a></div></div>"""
+        account_navigation = f"""<div class="nav-account-menu"><a class="nav-user-avatar" href="/account" target="_top" aria-label="Open account menu">{nav_user_initial}</a><div class="nav-account-dropdown"><div class="nav-account-identity"><strong>{nav_user_name}</strong><span>{nav_user_email}</span></div><a href="/account" target="_top">Account settings</a><a class="sign-out" href="/logout" target="_top">Sign out</a></div></div>"""
     else:
-        account_navigation = '<a href="/account" target="_self">Account</a>'
+        account_navigation = '<a href="/account" target="_top">Account</a>'
 
     landing_markup = dedent(
         f"""
         <main class="mira-story">
             <header class="mira-news-header">
                 <div class="news-top">
-                    <a class="news-brand" href="/" target="_self" aria-label="MIRA home"><span class="news-brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>MIRA</span></a>
+                    <a class="news-brand" href="/" target="_top" aria-label="MIRA home"><span class="news-brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>MIRA</span></a>
                     <nav class="news-nav" aria-label="Primary navigation">
-                        <a class="active" href="/" target="_self"><i class="nav-icon">⌂</i>Home</a>
-                        <a href="/about" target="_self"><i class="nav-icon">◉</i>About</a>
-                        <a href="https://www.hyperneuronai.com/" target="_self"><i class="nav-icon">◇</i>Parent Website</a>
-                        <a href="{review_href}" target="_self"><i class="nav-icon">→</i>Review Workspace</a>
-                        {f'<a href="/projects" target="_self"><i class="nav-icon">▦</i>Projects</a>' if signed_in else ''}
+                        <a class="active" href="/" target="_top"><i class="nav-icon">⌂</i>Home</a>
+                        <a href="/about" target="_top"><i class="nav-icon">◉</i>About</a>
+                        <a href="https://www.hyperneuronai.com/" target="_top"><i class="nav-icon">◇</i>Parent Website</a>
+                        <a href="{review_href}" target="_top"><i class="nav-icon">→</i>Review Workspace</a>
+                        {f'<a href="/projects" target="_top"><i class="nav-icon">▦</i>Projects</a>' if signed_in else ''}
                     </nav>
                     <div class="news-actions">{account_navigation}</div>
                 </div>
@@ -2649,7 +2649,7 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
                         <div><i>✦</i><span><strong>Our review features</strong><small>Choose the evaluation workflow designed for your data.</small></span></div>
                     </div>
                     <div class="review-product-grid">
-                        <a class="review-product-card" href="/llm-review?model_type=slm" target="_self">
+                        <a class="review-product-card" href="/llm-review?model_type=slm" target="_top">
                             <div class="review-product-card-inner">
                                 <div class="review-product-icon">◉</div>
                                 <h3>SLM Data Review</h3>
@@ -2658,7 +2658,7 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
                                 <span class="review-product-action">Open SLM Review →</span>
                             </div>
                         </a>
-                        <a class="review-product-card" href="/llm-review?model_type=llm" target="_self">
+                        <a class="review-product-card" href="/llm-review?model_type=llm" target="_top">
                             <div class="review-product-card-inner">
                                 <div class="review-product-icon">◇</div>
                                 <h3>LLM Data Review</h3>
@@ -3421,9 +3421,9 @@ def render_site_footer() -> None:
     render_safe_html(
         """
         <footer class="site-footer">
-            <a class="site-footer-brand" href="/" target="_self" aria-label="Go to MIRA home"><i></i> MIRA</a>
+            <a class="site-footer-brand" href="/" target="_top" aria-label="Go to MIRA home"><i></i> MIRA</a>
             <div>Built for thoughtful human evaluation, not endless spreadsheets.</div>
-            <div class="site-footer-links"><a href="/account" target="_self">Account</a><a href="/about" target="_self">About</a><a href="https://www.hyperneuronai.com/" target="_self">HyperNeuron ↗</a></div>
+            <div class="site-footer-links"><a href="/account" target="_top">Account</a><a href="/about" target="_top">About</a><a href="https://www.hyperneuronai.com/" target="_top">HyperNeuron ↗</a></div>
         </footer>
         """
     )
@@ -3442,21 +3442,21 @@ def render_inner_navigation(active_page: str, back_href: str = "/") -> None:
         nav_user_name = escape(str(getattr(st.user, "name", None) or "Google user"))
         nav_user_email = escape(str(getattr(st.user, "email", None) or ""))
         nav_user_initial = (nav_user_name.strip()[:1] or nav_user_email.strip()[:1] or "G").upper()
-        account_navigation = f"""<div class="nav-account-menu"><a class="nav-user-avatar{account_active}" href="/account" target="_self" aria-label="Open account menu">{nav_user_initial}</a><div class="nav-account-dropdown"><div class="nav-account-identity"><strong>{nav_user_name}</strong><span>{nav_user_email}</span></div><a href="/account" target="_self">Account settings</a><a class="sign-out" href="/logout" target="_self">Sign out</a></div></div>"""
+        account_navigation = f"""<div class="nav-account-menu"><a class="nav-user-avatar{account_active}" href="/account" target="_top" aria-label="Open account menu">{nav_user_initial}</a><div class="nav-account-dropdown"><div class="nav-account-identity"><strong>{nav_user_name}</strong><span>{nav_user_email}</span></div><a href="/account" target="_top">Account settings</a><a class="sign-out" href="/logout" target="_top">Sign out</a></div></div>"""
     else:
-        account_navigation = f'<a class="{account_active.strip()}" href="/account" target="_self">Account</a>'
+        account_navigation = f'<a class="{account_active.strip()}" href="/account" target="_top">Account</a>'
     navigation_markup = dedent(
         f"""
         <header class="inner-site-header">
             <div class="news-top">
-                <a class="route-back-link" href="{escape(back_href)}" target="_self" aria-label="Go back">←</a>
-                <a class="news-brand" href="/" target="_self" aria-label="MIRA home"><span class="news-brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>MIRA</span></a>
+                <a class="route-back-link" href="{escape(back_href)}" target="_top" aria-label="Go back">←</a>
+                <a class="news-brand" href="/" target="_top" aria-label="MIRA home"><span class="news-brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>MIRA</span></a>
                 <nav class="news-nav" aria-label="Primary navigation">
-                    <a class="{home_active.strip()}" href="/" target="_self"><i class="nav-icon">⌂</i>Home</a>
-                    <a class="{about_active.strip()}" href="/about" target="_self"><i class="nav-icon">◉</i>About</a>
-                    <a href="https://www.hyperneuronai.com/" target="_self"><i class="nav-icon">◇</i>Parent Website</a>
-                    <a class="{review_active.strip()}" href="{review_href}" target="_self"><i class="nav-icon">→</i>Review Workspace</a>
-                    {f'<a class="{projects_active.strip()}" href="/projects" target="_self"><i class="nav-icon">▦</i>Projects</a>' if signed_in else ''}
+                    <a class="{home_active.strip()}" href="/" target="_top"><i class="nav-icon">⌂</i>Home</a>
+                    <a class="{about_active.strip()}" href="/about" target="_top"><i class="nav-icon">◉</i>About</a>
+                    <a href="https://www.hyperneuronai.com/" target="_top"><i class="nav-icon">◇</i>Parent Website</a>
+                    <a class="{review_active.strip()}" href="{review_href}" target="_top"><i class="nav-icon">→</i>Review Workspace</a>
+                    {f'<a class="{projects_active.strip()}" href="/projects" target="_top"><i class="nav-icon">▦</i>Projects</a>' if signed_in else ''}
                 </nav>
                 <div class="news-actions">{account_navigation}</div>
             </div>
