@@ -2221,8 +2221,24 @@ def prepare_download_dataframe(
     df: pd.DataFrame,
     criteria_target_columns: list,
 ) -> tuple[pd.DataFrame, list[str]]:
-    """Keep individual criterion ratings without creating overall columns."""
-    return df.copy(deep=True), []
+    """Add readable overall ratings to downloads without changing review UI."""
+    result = df.copy(deep=True)
+    overall_rating_columns = []
+    for source_column in criteria_target_columns:
+        source_rating_columns = [
+            dynamic_rating_column(source_column, rating_column)
+            for rating_column in RATING_COLUMNS
+            if dynamic_rating_column(source_column, rating_column) in result.columns
+        ]
+        if not source_rating_columns:
+            continue
+        output_column = f"{source_column} Overall Rating"
+        numeric_ratings = result[source_rating_columns].apply(
+            pd.to_numeric, errors="coerce"
+        )
+        result[output_column] = numeric_ratings.mean(axis=1).round(2).astype("Float64")
+        overall_rating_columns.append(output_column)
+    return result, overall_rating_columns
 
 
 def get_autosave_path(source_name: str) -> Path:
