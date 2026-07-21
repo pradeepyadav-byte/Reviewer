@@ -1539,64 +1539,77 @@ def inject_app_theme() -> None:
             box-shadow: 0 7px 16px rgba(109, 93, 252, 0.3);
         }
 
-        /* Each individual review criterion is a separate colored paper sheet. */
-        div[class*="st-key-criterion_sheet_"] div[data-testid="stVerticalBlockBorderWrapper"] {
+        /* Each reviewed response column sits on its own colored paper page. */
+        div[class*="st-key-criteria_paper_"] > div[data-testid="stVerticalBlockBorderWrapper"] {
             position: relative;
             overflow: visible;
-            margin: .35rem 0 .8rem;
-            padding: .85rem 1rem .55rem 1.15rem;
-            border: 1px solid rgba(45, 57, 72, 0.2) !important;
-            border-radius: 4px 14px 6px 11px !important;
-            box-shadow: 0 9px 18px rgba(31, 42, 68, 0.11), 0 2px 3px rgba(31, 42, 68, 0.07);
+            min-height: 100%;
+            padding: 1.1rem 1rem 1.25rem 1.25rem;
+            border: 1px solid rgba(45, 57, 72, 0.24) !important;
+            border-radius: 7px 20px 10px 16px !important;
+            box-shadow: 0 18px 38px rgba(31, 42, 68, 0.15), 0 3px 5px rgba(31, 42, 68, 0.08);
             background-color: var(--criteria-paper, #dff1f5) !important;
             background-image:
-                linear-gradient(90deg, transparent 0 1.65rem, rgba(211, 91, 91, 0.13) 1.65rem 1.72rem, transparent 1.72rem),
-                repeating-linear-gradient(0deg, transparent 0 28px, rgba(57, 76, 96, 0.07) 28px 29px) !important;
-            transform: rotate(var(--criteria-tilt, -0.2deg));
+                linear-gradient(90deg, transparent 0 2rem, rgba(190, 78, 78, 0.14) 2rem 2.08rem, transparent 2.08rem),
+                repeating-linear-gradient(0deg, transparent 0 32px, rgba(57, 76, 96, 0.075) 32px 33px),
+                radial-gradient(circle at 12% 7%, rgba(255,255,255,.5), transparent 25%) !important;
+            transform: rotate(var(--criteria-tilt, -0.28deg));
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        div[class*="st-key-criterion_sheet_"] div[data-testid="stVerticalBlockBorderWrapper"]::before {
+        div[class*="st-key-criteria_paper_"] > div[data-testid="stVerticalBlockBorderWrapper"]::before {
             content: "";
             position: absolute;
-            left: .45rem;
-            top: .72rem;
-            width: 7px;
-            height: 7px;
+            z-index: 2;
+            left: .55rem;
+            top: 1.2rem;
+            width: 9px;
+            height: 9px;
             border-radius: 50%;
-            background: rgba(255,255,255,.78);
-            border: 1px solid rgba(50,64,80,.18);
-            box-shadow: 0 31px 0 rgba(255,255,255,.72), 0 62px 0 rgba(255,255,255,.66);
+            background: rgba(255,255,255,.82);
+            border: 1px solid rgba(50,64,80,.22);
+            box-shadow: 0 46px 0 rgba(255,255,255,.76), 0 92px 0 rgba(255,255,255,.7);
         }
 
-        div[class*="st-key-criterion_sheet_"] div[data-testid="stVerticalBlockBorderWrapper"]::after {
+        div[class*="st-key-criteria_paper_"] > div[data-testid="stVerticalBlockBorderWrapper"]::after {
             content: "";
             position: absolute;
             z-index: 2;
             right: -1px;
             bottom: -1px;
-            width: 28px;
-            height: 28px;
+            width: 42px;
+            height: 42px;
             pointer-events: none;
             clip-path: polygon(100% 0, 0 100%, 100% 100%);
-            background: linear-gradient(135deg, rgba(255,255,255,.74), rgba(89,102,120,.14));
+            background: linear-gradient(135deg, rgba(255,255,255,.8), rgba(89,102,120,.18));
             filter: drop-shadow(-2px -2px 2px rgba(31,42,68,.08));
         }
 
-        div[class*="st-key-criterion_sheet_"] div[data-testid="stVerticalBlockBorderWrapper"]:hover {
+        div[class*="st-key-criteria_paper_"] > div[data-testid="stVerticalBlockBorderWrapper"]:hover {
             z-index: 3;
-            transform: rotate(0deg) translateY(-3px);
-            box-shadow: 0 14px 25px rgba(31, 42, 68, 0.16), 0 3px 5px rgba(31, 42, 68, 0.09);
+            transform: rotate(0deg) translateY(-4px);
+            box-shadow: 0 23px 44px rgba(31, 42, 68, 0.2), 0 4px 7px rgba(31, 42, 68, 0.1);
         }
 
-        div[class*="st-key-criterion_sheet_0_"] { --criteria-paper:#dff1f5; --criteria-tilt:-0.25deg; }
-        div[class*="st-key-criterion_sheet_1_"] { --criteria-paper:#f8ddd7; --criteria-tilt:0.25deg; }
-        div[class*="st-key-criterion_sheet_2_"] { --criteria-paper:#dff2e8; --criteria-tilt:-0.18deg; }
-        div[class*="st-key-criterion_sheet_3_"] { --criteria-paper:#f8efc9; --criteria-tilt:0.2deg; }
-        div[class*="st-key-criterion_sheet_4_"] { --criteria-paper:#e8e1f6; --criteria-tilt:-0.22deg; }
-        div[class*="st-key-criterion_sheet_5_"] { --criteria-paper:#f5dfc9; --criteria-tilt:0.22deg; }
-        div[class*="st-key-criterion_sheet_6_"] { --criteria-paper:#dce9f8; --criteria-tilt:-0.16deg; }
-        div[class*="st-key-criterion_sheet_7_"] { --criteria-paper:#f3dfea; --criteria-tilt:0.18deg; }
+        .st-key-criteria_paper_0 { --criteria-paper:#cfeaec; --criteria-tilt:-0.35deg; }
+        .st-key-criteria_paper_1 { --criteria-paper:#eadff3; --criteria-tilt:0.35deg; }
+        .st-key-criteria_paper_2 { --criteria-paper:#f5dfd4; --criteria-tilt:-0.28deg; }
+        .st-key-criteria_paper_3 { --criteria-paper:#dcebd5; --criteria-tilt:0.3deg; }
+        .st-key-criteria_paper_4 { --criteria-paper:#f3e7bd; --criteria-tilt:-0.3deg; }
+        .st-key-criteria_paper_5 { --criteria-paper:#d6e3f5; --criteria-tilt:0.28deg; }
+        .st-key-criteria_paper_6 { --criteria-paper:#f1dce6; --criteria-tilt:-0.24deg; }
+        .st-key-criteria_paper_7 { --criteria-paper:#e5e3cd; --criteria-tilt:0.24deg; }
+
+        /* Rating controls remain neutral and readable on the colored page. */
+        div[class*="st-key-criterion_sheet_"] > div[data-testid="stVerticalBlockBorderWrapper"] {
+            margin: .35rem 0 .8rem;
+            padding: .8rem 1rem .5rem;
+            border: 1px solid rgba(45,57,72,.17) !important;
+            border-radius: 12px !important;
+            background: rgba(255,255,255,.62) !important;
+            box-shadow: 0 5px 13px rgba(31,42,68,.07);
+            backdrop-filter: blur(2px);
+        }
 
         ::-webkit-scrollbar { width: 10px; height: 10px; }
         ::-webkit-scrollbar-track { background: #eef1f7; }
@@ -1616,7 +1629,7 @@ def inject_app_theme() -> None:
 
         @media (max-width: 760px) {
             .block-container { padding-left: 1rem; padding-right: 1rem; }
-            div[class*="st-key-criterion_sheet_"] div[data-testid="stVerticalBlockBorderWrapper"] { transform:none; }
+            div[class*="st-key-criteria_paper_"] > div[data-testid="stVerticalBlockBorderWrapper"] { transform:none; }
             div[data-testid="stMarkdownContainer"]:has(> .inner-site-header) { min-height:142px; }
             .inner-site-header { position:relative !important; left:auto; right:auto; top:auto; display:block !important; width:100%; max-width:100%; height:auto; min-height:132px; margin:.35rem 0 1rem !important; padding:.45rem !important; overflow:hidden; border:1px solid rgba(21,31,36,.08); border-radius:20px; background:rgba(255,255,255,.97); box-shadow:0 12px 30px rgba(21,31,36,.1); }
             .inner-site-header::before { display:none; }
