@@ -30,6 +30,12 @@ REVIEW_COLUMNS = [
 COLUMN_MAPPING_VERSION = 6
 COLUMN_MAPPING_PAGE = None
 LLM_REVIEW_PAGE = None
+HOME_PAGE = None
+REVIEW_PAGE = None
+PROJECTS_PAGE = None
+ABOUT_PAGE = None
+ACCOUNT_PAGE = None
+LOGOUT_PAGE = None
 
 
 def render_safe_html(markup: str) -> None:
@@ -714,6 +720,14 @@ def inject_app_theme() -> None:
         .news-actions a.primary { background:#f7f7f7; }
         .news-actions a.primary i { display:grid; place-items:center; width:24px; height:24px; border:1px solid #151f24; border-radius:50%; font-style:normal; transition:transform .2s ease; }
         .news-actions a.primary:hover i { transform:translateX(3px); }
+        .st-key-native_site_nav { position:relative; z-index:1000; display:flex; align-items:center; gap:.35rem; width:100%; margin:0 0 1rem; padding:.65rem .8rem; overflow-x:auto; border:1px solid rgba(21,31,36,.08); border-radius:24px; background:rgba(255,255,255,.97); box-shadow:0 15px 40px rgba(21,31,36,.09); scrollbar-width:none; }
+        .st-key-native_site_nav::-webkit-scrollbar { display:none; }
+        .st-key-native_site_nav > div { display:flex; align-items:center; gap:.35rem; width:100%; min-width:max-content; }
+        .st-key-native_site_nav div[data-testid="stPageLink"],.st-key-native_site_nav div[data-testid="stLinkButton"] { width:auto; }
+        .st-key-native_site_nav a { min-height:42px; padding:.62rem .84rem !important; border:1px solid transparent !important; border-radius:999px !important; color:#151f24 !important; background:#f7f7f7 !important; box-shadow:none !important; font-size:.78rem !important; font-weight:760 !important; text-decoration:none !important; white-space:nowrap; }
+        .st-key-native_site_nav a:hover { border-color:rgba(21,31,36,.18) !important; background:white !important; transform:translateY(-1px); }
+        .st-key-native_site_nav div[data-testid="stPageLink"]:first-child a { margin-right:.8rem; padding:.62rem 1rem !important; font-size:1rem !important; font-weight:900 !important; }
+        .st-key-native_site_nav div[data-testid="stPageLink"]:last-child { margin-left:auto; }
         .nav-account-menu { position:relative; display:flex; align-items:center; }
         .nav-user-avatar { display:grid !important; place-items:center; width:46px; height:46px; padding:0 !important; color:white !important; border-radius:50% !important; background:linear-gradient(135deg,#19647b,#13a994) !important; box-shadow:0 9px 22px rgba(25,100,123,.22); font-size:.95rem !important; font-weight:900 !important; }
         .nav-account-dropdown { position:absolute; z-index:80; right:0; top:calc(100% - 2px); width:235px; padding:.85rem .65rem .65rem; border:1px solid rgba(21,31,36,.1); border-radius:16px; background:rgba(255,255,255,.98); box-shadow:0 20px 48px rgba(21,31,36,.18); opacity:0; pointer-events:none; transform:translateY(-4px); transition:opacity .18s ease,transform .18s ease; }
@@ -1900,6 +1914,24 @@ def inject_dark_mode_theme() -> None:
     )
 
 
+def render_native_navigation(signed_in: bool) -> None:
+    """Render reliable native multipage links with MIRA header styling."""
+    review_destination = REVIEW_PAGE if signed_in else ACCOUNT_PAGE
+    with st.container(horizontal=True, vertical_alignment="center", key="native_site_nav"):
+        st.page_link(HOME_PAGE, label="MIRA", icon=":material/cloud:")
+        st.page_link(HOME_PAGE, label="Home", icon=":material/home:")
+        st.page_link(ABOUT_PAGE, label="About", icon=":material/info:")
+        st.link_button(
+            "Parent Website",
+            "https://www.hyperneuronai.com/",
+            icon=":material/open_in_new:",
+        )
+        st.page_link(review_destination, label="Review Workspace", icon=":material/arrow_forward:")
+        if signed_in:
+            st.page_link(PROJECTS_PAGE, label="Projects", icon=":material/folder_open:")
+        st.page_link(ACCOUNT_PAGE, label="Account", icon=":material/account_circle:")
+
+
 def render_page_header(evaluation_started: bool) -> None:
     """Render a contextual hero for setup and evaluation modes."""
     if evaluation_started:
@@ -1908,30 +1940,11 @@ def render_page_header(evaluation_started: bool) -> None:
     auth_ready = google_auth_configured()
     signed_in = auth_ready and bool(getattr(st.user, "is_logged_in", False))
     review_href = "/review" if signed_in else "/account"
-    if signed_in:
-        nav_user_name = escape(str(getattr(st.user, "name", None) or "Google user"))
-        nav_user_email = escape(str(getattr(st.user, "email", None) or ""))
-        nav_user_initial = (nav_user_name.strip()[:1] or nav_user_email.strip()[:1] or "G").upper()
-        account_navigation = f"""<div class="nav-account-menu"><a class="nav-user-avatar" href="/account" target="_parent" aria-label="Open account menu">{nav_user_initial}</a><div class="nav-account-dropdown"><div class="nav-account-identity"><strong>{nav_user_name}</strong><span>{nav_user_email}</span></div><a href="/account" target="_parent">Account settings</a><a class="sign-out" href="/logout" target="_parent">Sign out</a></div></div>"""
-    else:
-        account_navigation = '<a href="/account" target="_parent">Account</a>'
+    render_native_navigation(signed_in)
 
     landing_markup = dedent(
         f"""
         <main class="mira-story">
-            <header class="mira-news-header">
-                <div class="news-top">
-                    <a class="news-brand" href="/" target="_parent" aria-label="MIRA home"><span class="news-brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>MIRA</span></a>
-                    <nav class="news-nav" aria-label="Primary navigation">
-                        <a class="active" href="/" target="_parent"><i class="nav-icon">⌂</i>Home</a>
-                        <a href="/about" target="_parent"><i class="nav-icon">◉</i>About</a>
-                        <a href="https://www.hyperneuronai.com/" target="_parent"><i class="nav-icon">◇</i>Parent Website</a>
-                        <a href="{review_href}" target="_parent"><i class="nav-icon">→</i>Review Workspace</a>
-                        {f'<a href="/projects" target="_parent"><i class="nav-icon">▦</i>Projects</a>' if signed_in else ''}
-                    </nav>
-                    <div class="news-actions">{account_navigation}</div>
-                </div>
-            </header>
             <section class="depth-collage-hero">
                 <div class="evaluation-particles" aria-hidden="true"><i class="particle-swarm one"></i><i class="particle-swarm two"></i></div>
                 <div class="depth-hero-copy"><h1>The hidden depths of model evaluation</h1><p>A fluent response is only the visible surface. Beneath it lies context, language, relevance, safety and the human judgment that makes AI trustworthy.</p></div>
@@ -3431,39 +3444,7 @@ def render_site_footer() -> None:
 def render_inner_navigation(active_page: str, back_href: str = "/") -> None:
     """Render consistent navigation across secondary product pages."""
     signed_in = google_auth_configured() and bool(getattr(st.user, "is_logged_in", False))
-    review_href = "/review" if signed_in else "/account"
-    home_active = " active" if active_page == "home" else ""
-    about_active = " active" if active_page == "about" else ""
-    account_active = " active" if active_page == "account" else ""
-    review_active = " active" if active_page == "review" else ""
-    projects_active = " active" if active_page == "projects" else ""
-    if signed_in:
-        nav_user_name = escape(str(getattr(st.user, "name", None) or "Google user"))
-        nav_user_email = escape(str(getattr(st.user, "email", None) or ""))
-        nav_user_initial = (nav_user_name.strip()[:1] or nav_user_email.strip()[:1] or "G").upper()
-        account_navigation = f"""<div class="nav-account-menu"><a class="nav-user-avatar{account_active}" href="/account" target="_parent" aria-label="Open account menu">{nav_user_initial}</a><div class="nav-account-dropdown"><div class="nav-account-identity"><strong>{nav_user_name}</strong><span>{nav_user_email}</span></div><a href="/account" target="_parent">Account settings</a><a class="sign-out" href="/logout" target="_parent">Sign out</a></div></div>"""
-    else:
-        account_navigation = f'<a class="{account_active.strip()}" href="/account" target="_parent">Account</a>'
-    navigation_markup = dedent(
-        f"""
-        <header class="inner-site-header">
-            <div class="news-top">
-                <a class="route-back-link" href="{escape(back_href)}" target="_parent" aria-label="Go back">←</a>
-                <a class="news-brand" href="/" target="_parent" aria-label="MIRA home"><span class="news-brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>MIRA</span></a>
-                <nav class="news-nav" aria-label="Primary navigation">
-                    <a class="{home_active.strip()}" href="/" target="_parent"><i class="nav-icon">⌂</i>Home</a>
-                    <a class="{about_active.strip()}" href="/about" target="_parent"><i class="nav-icon">◉</i>About</a>
-                    <a href="https://www.hyperneuronai.com/" target="_parent"><i class="nav-icon">◇</i>Parent Website</a>
-                    <a class="{review_active.strip()}" href="{review_href}" target="_parent"><i class="nav-icon">→</i>Review Workspace</a>
-                    {f'<a class="{projects_active.strip()}" href="/projects" target="_parent"><i class="nav-icon">▦</i>Projects</a>' if signed_in else ''}
-                </nav>
-                <div class="news-actions">{account_navigation}</div>
-            </div>
-        </header>
-        """
-    ).strip()
-    navigation_markup = "".join(line.strip() for line in navigation_markup.splitlines())
-    render_safe_html(navigation_markup)
+    render_native_navigation(signed_in)
 
 
 def home_page():
@@ -3698,6 +3679,7 @@ def logout_page():
 def run_app():
     """Configure and run the multipage Streamlit application."""
     global COLUMN_MAPPING_PAGE, LLM_REVIEW_PAGE
+    global HOME_PAGE, REVIEW_PAGE, PROJECTS_PAGE, ABOUT_PAGE, ACCOUNT_PAGE, LOGOUT_PAGE
     st.set_page_config(page_title="MIRA · Model Inference and Response Annotation", page_icon="◉", layout="wide")
     # Load positioning CSS before creating the switch. Otherwise Streamlit can
     # briefly render it as a normal block and push the page below a blank frame.
@@ -3724,27 +3706,48 @@ def run_app():
         icon=":material/table_view:" if signed_in else ":material/lock:",
         url_path="llm-review",
     )
+    HOME_PAGE = st.Page(home_page, title="Home", icon=":material/home:", url_path="home", default=True)
+    REVIEW_PAGE = st.Page(
+        protected_review_workspace,
+        title="Review Workspace",
+        icon=":material/rate_review:" if signed_in else ":material/lock:",
+        url_path="review",
+    )
+    PROJECTS_PAGE = st.Page(
+        projects_page,
+        title="Projects",
+        icon=":material/folder_open:" if signed_in else ":material/lock:",
+        url_path="projects",
+    )
+    ABOUT_PAGE = st.Page(about_page, title="About", icon=":material/info:", url_path="about")
+    ACCOUNT_PAGE = st.Page(
+        account_page,
+        title="Account" if signed_in else "Sign in",
+        icon=":material/account_circle:" if signed_in else ":material/login:",
+        url_path="account",
+    )
+    LOGOUT_PAGE = st.Page(logout_page, title="Sign out", icon=":material/logout:", url_path="logout")
     if signed_in:
         pages = [
-            st.Page(home_page, title="Home", icon=":material/home:", url_path="home", default=True),
-            st.Page(protected_review_workspace, title="Review Workspace", icon=":material/rate_review:", url_path="review"),
+            HOME_PAGE,
+            REVIEW_PAGE,
             LLM_REVIEW_PAGE,
             COLUMN_MAPPING_PAGE,
-            st.Page(projects_page, title="Projects", icon=":material/folder_open:", url_path="projects"),
-            st.Page(about_page, title="About", icon=":material/info:", url_path="about"),
-            st.Page(account_page, title="Account", icon=":material/account_circle:", url_path="account"),
-            st.Page(logout_page, title="Sign out", icon=":material/logout:", url_path="logout"),
+            PROJECTS_PAGE,
+            ABOUT_PAGE,
+            ACCOUNT_PAGE,
+            LOGOUT_PAGE,
         ]
     else:
         pages = [
-            st.Page(home_page, title="Home", icon=":material/home:", url_path="home", default=True),
-            st.Page(protected_review_workspace, title="Review Workspace", icon=":material/lock:", url_path="review"),
+            HOME_PAGE,
+            REVIEW_PAGE,
             LLM_REVIEW_PAGE,
             COLUMN_MAPPING_PAGE,
-            st.Page(projects_page, title="Projects", icon=":material/lock:", url_path="projects"),
-            st.Page(about_page, title="About", icon=":material/info:", url_path="about"),
-            st.Page(account_page, title="Sign in", icon=":material/login:", url_path="account"),
-            st.Page(logout_page, title="Sign out", icon=":material/logout:", url_path="logout"),
+            PROJECTS_PAGE,
+            ABOUT_PAGE,
+            ACCOUNT_PAGE,
+            LOGOUT_PAGE,
         ]
     navigation = st.navigation(pages, position="hidden")
     navigation.run()
