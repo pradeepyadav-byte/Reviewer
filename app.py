@@ -110,6 +110,22 @@ def inject_app_theme() -> None:
         }
         [data-testid="stNavigation"] a:hover { background:#f0edff !important; transform:translateY(-1px); }
 
+        .st-key-mira_dark_mode {
+            position:fixed;
+            z-index:1000000;
+            top:.48rem;
+            right:4.25rem;
+            width:auto !important;
+            padding:.35rem .72rem .28rem;
+            border:1px solid rgba(109,93,252,.18);
+            border-radius:999px;
+            background:rgba(255,255,255,.94);
+            box-shadow:0 8px 22px rgba(31,42,68,.12);
+            backdrop-filter:blur(14px);
+        }
+        .st-key-mira_dark_mode label { margin:0 !important; }
+        .st-key-mira_dark_mode p { font-size:.72rem !important; font-weight:800 !important; white-space:nowrap; }
+
         .stApp {
             background:
                 linear-gradient(135deg, rgba(109,93,252,.11), transparent 28%),
@@ -1630,6 +1646,8 @@ def inject_app_theme() -> None:
 
         @media (max-width: 760px) {
             .block-container { padding-left: 1rem; padding-right: 1rem; }
+            .st-key-mira_dark_mode { top:.42rem; right:3.5rem; padding:.28rem .5rem .22rem; }
+            .st-key-mira_dark_mode p { font-size:.64rem !important; }
             div[class*="st-key-criteria_paper_"] > div[data-testid="stVerticalBlockBorderWrapper"] { transform:none; }
             div[data-testid="stMarkdownContainer"]:has(> .inner-site-header) { min-height:142px; }
             .inner-site-header { position:relative !important; left:auto; right:auto; top:auto; display:block !important; width:100%; max-width:100%; height:auto; min-height:132px; margin:.35rem 0 1rem !important; padding:.45rem !important; overflow:hidden; border:1px solid rgba(21,31,36,.08); border-radius:20px; background:rgba(255,255,255,.97); box-shadow:0 12px 30px rgba(21,31,36,.1); }
@@ -1785,6 +1803,101 @@ def inject_app_theme() -> None:
         </div>
         """
     render_safe_html(_embed_theme_assets(theme_markup))
+
+
+def inject_dark_mode_theme() -> None:
+    """Apply a genuine dark palette across every MIRA page."""
+    render_safe_html(
+        """
+        <style>
+        html { color-scheme:dark; }
+        .stApp,
+        [data-testid="stAppViewContainer"] {
+            color:#e7edf7 !important;
+            background:
+                radial-gradient(circle at 12% 8%,rgba(109,93,252,.22),transparent 30%),
+                radial-gradient(circle at 88% 14%,rgba(19,184,166,.14),transparent 28%),
+                #08111f !important;
+        }
+        header[data-testid="stHeader"] { background:rgba(8,17,31,.9) !important; border-color:rgba(148,163,184,.16) !important; }
+        [data-testid="stToolbar"], [data-testid="stDecoration"] { color:#e7edf7 !important; }
+        .block-container { color:#e7edf7; }
+        .block-container p,.block-container label,.block-container small,.block-container span { color:inherit; }
+        .block-container h1,.block-container h2,.block-container h3,.block-container h4,.block-container h5,.block-container h6 { color:#f7f9ff; }
+
+        .inner-site-header,.mira-news-header .news-top {
+            border-color:rgba(148,163,184,.2) !important;
+            background:rgba(10,20,35,.94) !important;
+            box-shadow:0 16px 38px rgba(0,0,0,.35) !important;
+        }
+        .news-brand,.news-nav a,.news-actions a,.route-back-link { color:#eaf0fa !important; }
+        .news-nav,.news-actions > a,.nav-account-dropdown { background:rgba(24,36,54,.92) !important; }
+        .news-nav a:hover,.news-nav a.active { background:#31405a !important; }
+        .nav-account-dropdown { border-color:rgba(148,163,184,.22) !important; }
+
+        div[data-testid="stVerticalBlockBorderWrapper"],
+        div[data-testid="stExpander"],
+        div[data-testid="stAlert"],
+        [data-testid="stMetric"],
+        .review-hero,.workspace-intro,.projects-hero,.about-card,.about-step,
+        .saved-project-card,.resource-card,.rating-guide,.mapping-workbench-intro,
+        .empty-review-state,.st-key-feature_stage,.st-key-upload_stage {
+            color:#e7edf7 !important;
+            border-color:rgba(148,163,184,.2) !important;
+            background:rgba(15,27,44,.9) !important;
+            box-shadow:0 14px 34px rgba(0,0,0,.25) !important;
+        }
+        .projects-hero p,.about-card p,.about-step,.workspace-intro p,.review-hero p { color:#b7c2d3 !important; }
+
+        div[data-baseweb="select"] > div,
+        .stTextInput input,.stTextArea textarea,.stNumberInput input,
+        div[data-testid="stFileUploaderDropzone"] {
+            color:#eef3fb !important;
+            border-color:rgba(148,163,184,.28) !important;
+            background:#111f32 !important;
+            -webkit-text-fill-color:#eef3fb !important;
+        }
+        div[data-baseweb="popover"],ul[role="listbox"] { color:#eef3fb !important; background:#111f32 !important; }
+        div[data-testid="stDataFrame"] { border-color:rgba(148,163,184,.25) !important; background:#0f1b2c !important; }
+        div[data-testid="stDataFrame"] iframe { color-scheme:dark; }
+        div[data-testid="stPills"] button { color:#dbe5f3 !important; border-color:#506079 !important; background:#16263b !important; }
+        div[data-testid="stPills"] button[aria-pressed="true"] { color:#fff !important; background:linear-gradient(135deg,#7b6cff,#5e51d7) !important; }
+        .stButton > button,.stDownloadButton > button { color:#e7edf7 !important; border-color:#506079 !important; background:#17273c !important; }
+        .stButton > button[kind="primary"] { color:#fff !important; border-color:transparent !important; background:linear-gradient(135deg,#ff5a63,#e9404b) !important; }
+
+        .mira-story,.about-domain-story,.about-principles,.about-workflow,.about-manifesto,
+        .mira-quick-pitch,.bento-section,.evaluation-collage,.site-footer {
+            color:#e7edf7 !important;
+            border-color:rgba(148,163,184,.16) !important;
+            background-color:#0c1728 !important;
+        }
+        .mira-quick-pitch p,.story-copy,.about-manifesto p,.about-section-heading p,.site-footer { color:#b8c4d6 !important; }
+        .quick-pitch-title,.story-section h2,.bento-head h2,.about-manifesto h2,.about-section-heading h2 { color:#f6f8fc !important; }
+        .depth-collage-hero .depth-hero-copy h1 { color:#0b1017 !important; }
+        .depth-collage-hero .depth-hero-copy p { color:#26323a !important; }
+
+        /* Preserve paper-card contrast inside the dark workspace. */
+        div[class*="st-key-criteria_paper_"] > div[data-testid="stVerticalBlockBorderWrapper"] {
+            color:#172033 !important;
+            border-color:var(--criteria-accent, #287d82) !important;
+            background-color:var(--criteria-paper, #b9e4df) !important;
+            background-image:
+                linear-gradient(90deg,transparent 0 2.25rem,rgba(190,78,78,.2) 2.25rem 2.35rem,transparent 2.35rem),
+                repeating-linear-gradient(0deg,transparent 0 32px,rgba(57,76,96,.11) 32px 33px),
+                radial-gradient(circle at 12% 7%,rgba(255,255,255,.64),transparent 27%) !important;
+        }
+        div[class*="st-key-criteria_paper_"] h1,
+        div[class*="st-key-criteria_paper_"] h2,
+        div[class*="st-key-criteria_paper_"] h3,
+        div[class*="st-key-criteria_paper_"] h4,
+        div[class*="st-key-criteria_paper_"] p,
+        div[class*="st-key-criteria_paper_"] span { color:#172033 !important; }
+        div[class*="st-key-criterion_sheet_"] > div[data-testid="stVerticalBlockBorderWrapper"] { background:rgba(255,255,255,.5) !important; }
+
+        .st-key-mira_dark_mode { background:#111f32 !important; border-color:#506079 !important; }
+        </style>
+        """
+    )
 
 
 def render_page_header(evaluation_started: bool) -> None:
@@ -3586,7 +3699,14 @@ def run_app():
     """Configure and run the multipage Streamlit application."""
     global COLUMN_MAPPING_PAGE, LLM_REVIEW_PAGE
     st.set_page_config(page_title="MIRA · Model Inference and Response Annotation", page_icon="◉", layout="wide")
+    dark_mode_enabled = st.toggle(
+        "Dark mode",
+        key="mira_dark_mode",
+        help="Switch the complete MIRA workspace between light and dark themes.",
+    )
     inject_app_theme()
+    if dark_mode_enabled:
+        inject_dark_mode_theme()
     install_navigation_history_support()
     auth_ready = google_auth_configured()
     signed_in = auth_ready and bool(getattr(st.user, "is_logged_in", False))
