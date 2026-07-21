@@ -1544,15 +1544,16 @@ def inject_app_theme() -> None:
             position: relative;
             overflow: visible;
             min-height: 100%;
-            padding: 1.1rem 1rem 1.25rem 1.25rem;
-            border: 1px solid rgba(45, 57, 72, 0.24) !important;
+            padding: 1.35rem 1.25rem 1.55rem 1.65rem;
+            border: 2px solid var(--criteria-accent, #287d82) !important;
+            border-left-width: 10px !important;
             border-radius: 7px 20px 10px 16px !important;
-            box-shadow: 0 18px 38px rgba(31, 42, 68, 0.15), 0 3px 5px rgba(31, 42, 68, 0.08);
+            box-shadow: 0 22px 44px color-mix(in srgb, var(--criteria-accent, #287d82) 24%, transparent), 0 4px 7px rgba(31, 42, 68, 0.12);
             background-color: var(--criteria-paper, #dff1f5) !important;
             background-image:
-                linear-gradient(90deg, transparent 0 2rem, rgba(190, 78, 78, 0.14) 2rem 2.08rem, transparent 2.08rem),
-                repeating-linear-gradient(0deg, transparent 0 32px, rgba(57, 76, 96, 0.075) 32px 33px),
-                radial-gradient(circle at 12% 7%, rgba(255,255,255,.5), transparent 25%) !important;
+                linear-gradient(90deg, transparent 0 2.25rem, rgba(190, 78, 78, 0.2) 2.25rem 2.35rem, transparent 2.35rem),
+                repeating-linear-gradient(0deg, transparent 0 32px, rgba(57, 76, 96, 0.11) 32px 33px),
+                radial-gradient(circle at 12% 7%, rgba(255,255,255,.64), transparent 27%) !important;
             transform: rotate(var(--criteria-tilt, -0.28deg));
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
@@ -1591,22 +1592,22 @@ def inject_app_theme() -> None:
             box-shadow: 0 23px 44px rgba(31, 42, 68, 0.2), 0 4px 7px rgba(31, 42, 68, 0.1);
         }
 
-        .st-key-criteria_paper_0 { --criteria-paper:#cfeaec; --criteria-tilt:-0.35deg; }
-        .st-key-criteria_paper_1 { --criteria-paper:#eadff3; --criteria-tilt:0.35deg; }
-        .st-key-criteria_paper_2 { --criteria-paper:#f5dfd4; --criteria-tilt:-0.28deg; }
-        .st-key-criteria_paper_3 { --criteria-paper:#dcebd5; --criteria-tilt:0.3deg; }
-        .st-key-criteria_paper_4 { --criteria-paper:#f3e7bd; --criteria-tilt:-0.3deg; }
-        .st-key-criteria_paper_5 { --criteria-paper:#d6e3f5; --criteria-tilt:0.28deg; }
-        .st-key-criteria_paper_6 { --criteria-paper:#f1dce6; --criteria-tilt:-0.24deg; }
-        .st-key-criteria_paper_7 { --criteria-paper:#e5e3cd; --criteria-tilt:0.24deg; }
+        .st-key-criteria_paper_0 { --criteria-paper:#b9e4df; --criteria-accent:#177f78; --criteria-tilt:-0.35deg; }
+        .st-key-criteria_paper_1 { --criteria-paper:#d8c8ef; --criteria-accent:#7451a8; --criteria-tilt:0.35deg; }
+        .st-key-criteria_paper_2 { --criteria-paper:#f3c5b7; --criteria-accent:#b45f47; --criteria-tilt:-0.28deg; }
+        .st-key-criteria_paper_3 { --criteria-paper:#dbe1a2; --criteria-accent:#747a28; --criteria-tilt:0.3deg; }
+        .st-key-criteria_paper_4 { --criteria-paper:#f0d993; --criteria-accent:#a27a15; --criteria-tilt:-0.3deg; }
+        .st-key-criteria_paper_5 { --criteria-paper:#bfd5f1; --criteria-accent:#356ba8; --criteria-tilt:0.28deg; }
+        .st-key-criteria_paper_6 { --criteria-paper:#edc4d9; --criteria-accent:#a34778; --criteria-tilt:-0.24deg; }
+        .st-key-criteria_paper_7 { --criteria-paper:#d7d5ae; --criteria-accent:#6e7040; --criteria-tilt:0.24deg; }
 
         /* Rating controls remain neutral and readable on the colored page. */
         div[class*="st-key-criterion_sheet_"] > div[data-testid="stVerticalBlockBorderWrapper"] {
-            margin: .35rem 0 .8rem;
-            padding: .8rem 1rem .5rem;
-            border: 1px solid rgba(45,57,72,.17) !important;
+            margin: .55rem 0 1rem;
+            padding: .85rem 1rem .55rem;
+            border: 1px solid rgba(45,57,72,.24) !important;
             border-radius: 12px !important;
-            background: rgba(255,255,255,.62) !important;
+            background: rgba(255,255,255,.46) !important;
             box-shadow: 0 5px 13px rgba(31,42,68,.07);
             backdrop-filter: blur(2px);
         }
