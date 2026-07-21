@@ -41,32 +41,12 @@ def render_safe_html(markup: str) -> None:
 
 
 def install_navigation_history_support() -> None:
-    """Make custom internal links create reliable browser-history entries."""
-    st.components.v1.html(
-        """
-        <script>
-        (() => {
-          const host = window.parent;
-          const doc = host.document;
-          if (host.__miraHistoryNavigationInstalled) return;
-          host.__miraHistoryNavigationInstalled = true;
-          doc.addEventListener('click', (event) => {
-            const link = event.target.closest(
-              '.news-brand, .news-nav a, .site-footer a, .about-home-link, .auth-route-link'
-            );
-            if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-            const rawHref = link.getAttribute('href');
-            if (!rawHref || rawHref.startsWith('#') || rawHref.startsWith('javascript:')) return;
-            const destination = new URL(rawHref, host.location.href);
-            if (destination.origin !== host.location.origin) return;
-            event.preventDefault();
-            host.location.assign(destination.href);
-          }, true);
-        })();
-        </script>
-        """,
-        height=0,
-    )
+    """Keep navigation native so links work across Streamlit Cloud and mobile."""
+    # Custom click interception previously called preventDefault() before trying
+    # to navigate the parent window from a component iframe. Some browsers and
+    # Streamlit Cloud sessions block that parent navigation, leaving every link
+    # inert. Root-based anchors already create correct same-tab browser history.
+    return None
 
 
 class MemoryUpload(BytesIO):
