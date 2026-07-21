@@ -57,12 +57,6 @@ def install_navigation_history_support() -> None:
             if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
             const rawHref = link.getAttribute('href');
             if (!rawHref || rawHref.startsWith('#') || rawHref.startsWith('javascript:')) return;
-            if (link.matches('.nav-back-link')) {
-              event.preventDefault();
-              if (host.history.length > 1) host.history.back();
-              else host.location.assign(new URL('/', host.location.href).href);
-              return;
-            }
             const destination = new URL(rawHref, host.location.href);
             if (destination.origin !== host.location.origin) return;
             event.preventDefault();
@@ -1926,6 +1920,11 @@ def fetch_google_drive_file(shared_url: str) -> MemoryUpload:
 
 def ensure_review_columns(df: pd.DataFrame) -> pd.DataFrame:
     """Add review columns and keep text and numeric ratings in suitable dtypes."""
+    deprecated_overall_columns = [
+        column for column in df.columns if str(column).endswith("_overall_rating")
+    ]
+    if deprecated_overall_columns:
+        df = df.drop(columns=deprecated_overall_columns)
     for col in REVIEW_COLUMNS:
         if col in RATING_COLUMNS:
             if col not in df.columns:
@@ -2222,38 +2221,8 @@ def prepare_download_dataframe(
     df: pd.DataFrame,
     criteria_target_columns: list,
 ) -> tuple[pd.DataFrame, list[str]]:
-    """Replace detailed criterion ratings with one overall rating per target."""
-    result = df.copy(deep=True)
-    detailed_rating_columns = []
-    overall_rating_columns = []
-
-    for source_column in criteria_target_columns:
-        source_rating_columns = [
-            dynamic_rating_column(source_column, rating_column)
-            for rating_column in RATING_COLUMNS
-            if dynamic_rating_column(source_column, rating_column) in result.columns
-        ]
-        if not source_rating_columns:
-            continue
-
-        overall_column = f"{source_column}_overall_rating"
-        numeric_ratings = result[source_rating_columns].apply(
-            pd.to_numeric, errors="coerce"
-        )
-        result[overall_column] = numeric_ratings.mean(axis=1).round(2).astype("Float64")
-        detailed_rating_columns.extend(source_rating_columns)
-        overall_rating_columns.append(overall_column)
-
-    legacy_rating_columns = [
-        column for column in RATING_COLUMNS if column in result.columns
-    ]
-    columns_to_drop = list(
-        dict.fromkeys(detailed_rating_columns + legacy_rating_columns)
-    )
-    if columns_to_drop:
-        result = result.drop(columns=columns_to_drop)
-
-    return result, overall_rating_columns
+    """Keep individual criterion ratings without creating overall columns."""
+    return df.copy(deep=True), []
 
 
 def get_autosave_path(source_name: str) -> Path:
@@ -2379,18 +2348,6 @@ def persist_review_draft(
     for column, key in criteria_widget_keys.items():
         rating = rating_from_scale(st.session_state.get(key))
         df_review.at[row_index, column] = rating if rating is not None else pd.NA
-    for source_column in st.session_state.get("criteria_target_columns", []):
-        ratings = []
-        for rating_column in RATING_COLUMNS:
-            output_column = dynamic_rating_column(source_column, rating_column)
-            widget_key = criteria_widget_keys.get(output_column)
-            rating = rating_from_scale(st.session_state.get(widget_key)) if widget_key else None
-            if rating is not None:
-                ratings.append(rating)
-        overall_column = f"{source_column}_overall_rating"
-        df_review.at[row_index, overall_column] = (
-            round(sum(ratings) / len(ratings), 2) if ratings else pd.NA
-        )
 
     source_name = st.session_state.get("loaded_file_name")
     if source_name:
@@ -2489,8 +2446,13 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
     if mapping_only:
         page_marker = "evaluation-page-marker" if st.session_state.columns_confirmed else "mapping-page-marker"
         st.markdown(f'<div class="{page_marker}"></div>', unsafe_allow_html=True)
-    if not st.session_state.get("columns_confirmed", False):
-        render_inner_navigation("review")
+    if mapping_only:
+        back_href = "/llm-review"
+    elif force_llm:
+        back_href = "/review"
+    else:
+        back_href = "/"
+    render_inner_navigation("review", back_href=back_href)
 
     # ------------------ Upload ------------------
     uploaded = None
@@ -3053,21 +3015,6 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
                             label,
                             criteria_widget_keys[output_column],
                         )
-                    completed_ratings = [
-                        rating_values[dynamic_rating_column(source_column, rating_column)]
-                        for rating_column in RATING_COLUMNS
-                        if rating_values.get(dynamic_rating_column(source_column, rating_column)) is not None
-                    ]
-                    overall_rating = (
-                        round(sum(completed_ratings) / len(completed_ratings), 2)
-                        if completed_ratings
-                        else None
-                    )
-                    overall_column = f"{source_column}_overall_rating"
-                    st.session_state.df_review.at[row_index, overall_column] = (
-                        overall_rating if overall_rating is not None else pd.NA
-                    )
-                    st.metric("Overall rating", f"{overall_rating:.2f} / 5" if overall_rating is not None else "Not rated")
 
     st.markdown("#### Select the best response")
     st.caption("Choose the response that should be copied into the editable final response field. Select ‘All responses are bad’ only when none is usable.")
@@ -3289,7 +3236,7 @@ def render_site_footer() -> None:
     )
 
 
-def render_inner_navigation(active_page: str) -> None:
+def render_inner_navigation(active_page: str, back_href: str = "/") -> None:
     """Render consistent navigation across secondary product pages."""
     signed_in = google_auth_configured() and bool(getattr(st.user, "is_logged_in", False))
     review_href = "./review" if signed_in else "./account"
@@ -3309,7 +3256,7 @@ def render_inner_navigation(active_page: str) -> None:
         f"""
         <header class="inner-site-header">
             <div class="news-top">
-                <a class="nav-back-link" href="/" target="_self" aria-label="Go back">←</a>
+                <a class="nav-back-link" href="{escape(back_href)}" target="_self" aria-label="Go back">←</a>
                 <a class="news-brand" href="/" target="_self" aria-label="MIRA home"><span class="news-brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>MIRA</span></a>
                 <nav class="news-nav" aria-label="Primary navigation">
                     <a class="{home_active.strip()}" href="/" target="_self"><i class="nav-icon">⌂</i>Home</a>
