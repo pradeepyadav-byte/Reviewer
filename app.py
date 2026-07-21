@@ -52,7 +52,7 @@ def install_navigation_history_support() -> None:
           host.__miraHistoryNavigationInstalled = true;
           doc.addEventListener('click', (event) => {
             const link = event.target.closest(
-              '.nav-back-link, .news-brand, .news-nav a, .site-footer a, .about-home-link, .auth-route-link'
+              '.news-brand, .news-nav a, .site-footer a, .about-home-link, .auth-route-link'
             );
             if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
             const rawHref = link.getAttribute('href');
@@ -690,8 +690,8 @@ def inject_app_theme() -> None:
         .news-brand { display:inline-flex; align-items:center; gap:.72rem; flex:0 0 auto; padding:.78rem 1.18rem; color:#151f24 !important; border:1px solid transparent; border-radius:999px; background:#f7f7f7; box-shadow:0 0 0 rgba(21,31,36,0); font-size:1.45rem; font-weight:850; letter-spacing:-.035em; text-decoration:none !important; cursor:pointer; transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease,background .25s ease; }
         .news-brand > span:last-child { transition:transform .25s ease,letter-spacing .25s ease; }
         .news-brand:hover { border-color:rgba(25,100,123,.2); background:white; box-shadow:0 10px 25px rgba(21,31,36,.11); transform:translateY(-3px); }
-        .nav-back-link { display:grid; place-items:center; flex:0 0 42px; width:42px; height:42px; color:#151f24 !important; border:1px solid rgba(21,31,36,.12); border-radius:50%; background:#f7f7f7; font-size:1.15rem; font-weight:900; text-decoration:none !important; transition:transform .2s ease,background .2s ease; }
-        .nav-back-link:hover { background:white; transform:translateX(-2px); }
+        .route-back-link { display:grid; place-items:center; flex:0 0 42px; width:42px; height:42px; color:#151f24 !important; border:1px solid rgba(21,31,36,.12); border-radius:50%; background:#f7f7f7; font-size:1.15rem; font-weight:900; text-decoration:none !important; transition:transform .2s ease,background .2s ease; }
+        .route-back-link:hover { background:white; transform:translateX(-2px); }
         .news-brand:hover > span:last-child { letter-spacing:.015em; transform:translateX(2px); }
         .news-brand:focus-visible { outline:3px solid rgba(25,100,123,.28); outline-offset:3px; }
         .news-brand-mark { position:relative; width:36px; height:17px; }
@@ -3256,7 +3256,7 @@ def render_inner_navigation(active_page: str, back_href: str = "/") -> None:
         f"""
         <header class="inner-site-header">
             <div class="news-top">
-                <a class="nav-back-link" href="{escape(back_href)}" target="_self" aria-label="Go back">←</a>
+                <a class="route-back-link" href="{escape(back_href)}" target="_self" aria-label="Go back">←</a>
                 <a class="news-brand" href="/" target="_self" aria-label="MIRA home"><span class="news-brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>MIRA</span></a>
                 <nav class="news-nav" aria-label="Primary navigation">
                     <a class="{home_active.strip()}" href="/" target="_self"><i class="nav-icon">⌂</i>Home</a>
