@@ -32,6 +32,49 @@ COLUMN_MAPPING_PAGE = None
 LLM_REVIEW_PAGE = None
 
 
+def render_safe_html(markup: str) -> None:
+    """Render HTML without allowing Markdown to expose indented source code."""
+    compact_markup = "".join(
+        line.strip() for line in dedent(str(markup)).splitlines()
+    )
+    st.markdown(compact_markup, unsafe_allow_html=True)
+
+
+def install_navigation_history_support() -> None:
+    """Make custom internal links create reliable browser-history entries."""
+    st.components.v1.html(
+        """
+        <script>
+        (() => {
+          const host = window.parent;
+          const doc = host.document;
+          if (host.__miraHistoryNavigationInstalled) return;
+          host.__miraHistoryNavigationInstalled = true;
+          doc.addEventListener('click', (event) => {
+            const link = event.target.closest(
+              '.nav-back-link, .news-brand, .news-nav a, .site-footer a, .about-home-link, .auth-route-link'
+            );
+            if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+            const rawHref = link.getAttribute('href');
+            if (!rawHref || rawHref.startsWith('#') || rawHref.startsWith('javascript:')) return;
+            if (link.matches('.nav-back-link')) {
+              event.preventDefault();
+              if (host.history.length > 1) host.history.back();
+              else host.location.assign(new URL('/', host.location.href).href);
+              return;
+            }
+            const destination = new URL(rawHref, host.location.href);
+            if (destination.origin !== host.location.origin) return;
+            event.preventDefault();
+            host.location.assign(destination.href);
+          }, true);
+        })();
+        </script>
+        """,
+        height=0,
+    )
+
+
 class MemoryUpload(BytesIO):
     """UploadedFile-compatible in-memory file fetched from Google Drive."""
 
@@ -653,6 +696,8 @@ def inject_app_theme() -> None:
         .news-brand { display:inline-flex; align-items:center; gap:.72rem; flex:0 0 auto; padding:.78rem 1.18rem; color:#151f24 !important; border:1px solid transparent; border-radius:999px; background:#f7f7f7; box-shadow:0 0 0 rgba(21,31,36,0); font-size:1.45rem; font-weight:850; letter-spacing:-.035em; text-decoration:none !important; cursor:pointer; transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease,background .25s ease; }
         .news-brand > span:last-child { transition:transform .25s ease,letter-spacing .25s ease; }
         .news-brand:hover { border-color:rgba(25,100,123,.2); background:white; box-shadow:0 10px 25px rgba(21,31,36,.11); transform:translateY(-3px); }
+        .nav-back-link { display:grid; place-items:center; flex:0 0 42px; width:42px; height:42px; color:#151f24 !important; border:1px solid rgba(21,31,36,.12); border-radius:50%; background:#f7f7f7; font-size:1.15rem; font-weight:900; text-decoration:none !important; transition:transform .2s ease,background .2s ease; }
+        .nav-back-link:hover { background:white; transform:translateX(-2px); }
         .news-brand:hover > span:last-child { letter-spacing:.015em; transform:translateX(2px); }
         .news-brand:focus-visible { outline:3px solid rgba(25,100,123,.28); outline-offset:3px; }
         .news-brand-mark { position:relative; width:36px; height:17px; }
@@ -1691,10 +1736,7 @@ def inject_app_theme() -> None:
             <span class="creative-shape shape-cross-purple"></span>
         </div>
         """
-    st.markdown(
-        _embed_theme_assets(theme_markup),
-        unsafe_allow_html=True,
-    )
+    render_safe_html(_embed_theme_assets(theme_markup))
 
 
 def render_page_header(evaluation_started: bool) -> None:
@@ -1775,15 +1817,12 @@ def render_page_header(evaluation_started: bool) -> None:
     # Streamlit's Markdown parser can interpret indented HTML as a code block on
     # some mobile browsers. A compact string keeps the landing page valid HTML.
     landing_markup = "".join(line.strip() for line in landing_markup.splitlines())
-    st.markdown(
-        landing_markup,
-        unsafe_allow_html=True,
-    )
+    render_safe_html(landing_markup)
 
 
 def render_parent_brand_portal() -> None:
     """Render a compact, clickable parent-company brand experience."""
-    st.markdown(
+    render_safe_html(
         """
         <div class="parent-brand-card hn-network-card">
             <div class="parent-brand-copy">
@@ -1806,8 +1845,7 @@ def render_parent_brand_portal() -> None:
             <a class="parent-brand-hit-area" href="https://www.hyperneuronai.com/"
                target="_blank" rel="noopener noreferrer" aria-label="Visit HyperNeuron AI"></a>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
 
@@ -2459,7 +2497,7 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
     if not st.session_state.columns_confirmed and not mapping_only:
         if not force_llm:
             with st.container(key="feature_stage"):
-                st.markdown(
+                render_safe_html(
                     f"""
                     <div class="upload-section-head">
                         <div><i>✦</i><span><strong>Our review features</strong><small>Choose the evaluation workflow designed for your data.</small></span></div>
@@ -2484,21 +2522,19 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
                             </div>
                         </a>
                     </div>
-                    """,
-                    unsafe_allow_html=True,
+                    """
                 )
 
         if force_llm:
             with st.container(key="upload_stage"):
-                st.markdown(
+                render_safe_html(
                     f"""
                     <div class="upload-section-head">
                         <div><i>⇧</i><span><strong>Upload your {selected_model_type} dataset</strong><small>Choose where your evaluation data lives.</small></span></div>
                         <span class="upload-format-pills"><span>CSV</span><span>XLSX</span><span>XLS</span></span>
                     </div>
                     <div class="review-feature-note">Compare model responses, apply human ratings, edit the final answer, and export structured review data.</div>
-                    """,
-                    unsafe_allow_html=True,
+                    """
                 )
                 data_source = st.radio(
                     "Choose data source",
@@ -2617,15 +2653,14 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
         # ------------------ Column selection ------------------
         if mapping_only:
             loaded_name = escape(str(st.session_state.loaded_file_name or "Uploaded dataset"))
-            st.markdown(
+            render_safe_html(
                 f"""
                 <div class="mapping-workbench-intro">
                     <small>Annotation setup</small>
                     <strong>Shape the workspace around your data</strong>
                     <span><b>{loaded_name}</b> is ready. Assign the prompt and response columns, refine their display names, then begin evaluation.</span>
                 </div>
-                """,
-                unsafe_allow_html=True,
+                """
             )
         st.subheader("Map your columns")
         available_columns = list(st.session_state.df_original.columns)
@@ -2969,7 +3004,7 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
 
     rating_values = {}
 
-    st.markdown(
+    render_safe_html(
         """
         <style>
         div[data-testid="stPills"] button {
@@ -2980,8 +3015,7 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
         }
         </style>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
     def scale_rating(label: str, key: str) -> Optional[int]:
@@ -3244,15 +3278,14 @@ def review_workspace(force_llm: bool = False, mapping_only: bool = False):
 
 def render_site_footer() -> None:
     """Render shared product footer navigation."""
-    st.markdown(
+    render_safe_html(
         """
         <footer class="site-footer">
             <a class="site-footer-brand" href="/" target="_self" aria-label="Go to MIRA home"><i></i> MIRA</a>
             <div>Built for thoughtful human evaluation, not endless spreadsheets.</div>
             <div class="site-footer-links"><a href="./account" target="_self">Account</a><a href="./about" target="_self">About</a><a href="https://www.hyperneuronai.com/" target="_self">HyperNeuron ↗</a></div>
         </footer>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
 
@@ -3276,6 +3309,7 @@ def render_inner_navigation(active_page: str) -> None:
         f"""
         <header class="inner-site-header">
             <div class="news-top">
+                <a class="nav-back-link" href="/" target="_self" aria-label="Go back">←</a>
                 <a class="news-brand" href="/" target="_self" aria-label="MIRA home"><span class="news-brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>MIRA</span></a>
                 <nav class="news-nav" aria-label="Primary navigation">
                     <a class="{home_active.strip()}" href="/" target="_self"><i class="nav-icon">⌂</i>Home</a>
@@ -3290,10 +3324,7 @@ def render_inner_navigation(active_page: str) -> None:
         """
     ).strip()
     navigation_markup = "".join(line.strip() for line in navigation_markup.splitlines())
-    st.markdown(
-        navigation_markup,
-        unsafe_allow_html=True,
-    )
+    render_safe_html(navigation_markup)
 
 
 def home_page():
@@ -3326,15 +3357,14 @@ def projects_page():
         st.stop()
     st.markdown('<div class="projects-page-marker"></div>', unsafe_allow_html=True)
     render_inner_navigation("projects")
-    st.markdown(
+    render_safe_html(
         """
         <section class="projects-hero">
             <small>Saved evaluation workspace</small>
             <h1>Your review projects</h1>
             <p>Every upload keeps its mapping, ratings, edited responses, progress and last active row. Resume after a disconnect without rebuilding the evaluation.</p>
         </section>
-        """,
-        unsafe_allow_html=True,
+        """
     )
     projects = list_review_projects()
     action_left, action_right = st.columns([1, 2])
@@ -3362,9 +3392,8 @@ def projects_page():
             progress = float(project.get("progress") or 0)
             current_row = min(int(project.get("current_index") or 0) + 1, max(total, 1))
             with cards[offset]:
-                st.markdown(
-                    f"""<div class="saved-project-card"><small>Updated {escape(updated_label)}</small><h3>{escape(str(project.get('source_name') or 'Untitled review'))}</h3><p>{reviewed} of {total} rows reviewed · resume at row {current_row}</p><div class="saved-project-progress"><i style="width:{min(max(progress, 0), 100):.1f}%"></i></div></div>""",
-                    unsafe_allow_html=True,
+                render_safe_html(
+                    f"""<div class="saved-project-card"><small>Updated {escape(updated_label)}</small><h3>{escape(str(project.get('source_name') or 'Untitled review'))}</h3><p>{reviewed} of {total} rows reviewed · resume at row {current_row}</p><div class="saved-project-progress"><i style="width:{min(max(progress, 0), 100):.1f}%"></i></div></div>"""
                 )
                 if st.button("Resume project →", key=f"resume_project_{project_id}", width="stretch"):
                     if restore_project(project_id):
@@ -3378,7 +3407,7 @@ def about_page():
     """Explain the product, workflow, and parent-company connection."""
     st.markdown('<div class="about-page-marker"></div>', unsafe_allow_html=True)
     render_inner_navigation("about")
-    st.markdown(
+    render_safe_html(
         """
         <section class="about-hero">
             <div class="about-hero-copy"><small>About MIRA</small><h1>Human judgment is the final layer of intelligent AI.</h1><p>MIRA, Model Inference and Response Annotation, helps teams compare model responses with context, capture structured feedback, and produce reliable evaluation datasets without losing the nuance only a human reviewer can provide.</p></div>
@@ -3397,10 +3426,9 @@ def about_page():
             <div class="about-step"><b>03 · Review</b>Compare outputs and capture human judgment.</div>
             <div class="about-step"><b>04 · Export</b>Download a structured, evaluation-ready dataset.</div>
         </div></section>
-        """,
-        unsafe_allow_html=True,
+        """
     )
-    st.markdown(
+    render_safe_html(
         """
         <div class="about-actions">
             <div class="about-actions-copy">
@@ -3412,8 +3440,7 @@ def about_page():
                 <a class="about-company-link" href="https://www.hyperneuronai.com/" target="_blank" rel="noopener noreferrer">Explore HyperNeuron AI ↗</a>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
     render_site_footer()
 
@@ -3439,8 +3466,8 @@ def account_page():
     with st.container(key="account_page_shell"):
         with st.container(border=True, key="account_auth_panel"):
                 auth_state = "ready" if logged_in else "secure"
-                st.markdown(f'<div class="account-auth-state {auth_state}"><i></i>{"Workspace ready" if logged_in else "Secure sign in"}</div>', unsafe_allow_html=True)
-                st.markdown(
+                render_safe_html(f'<div class="account-auth-state {auth_state}"><i></i>{"Workspace ready" if logged_in else "Secure sign in"}</div>')
+                render_safe_html(
                     f"""
                     <div class="auth-panel-marker"></div>
                     <div class="auth-panel-head">
@@ -3448,18 +3475,16 @@ def account_page():
                         <h2>{"Welcome back" if logged_in else "Sign in to MIRA"}</h2>
                         <p>{"Your secure review workspace is ready." if logged_in else "Continue with Google to access model evaluation."}</p>
                     </div>
-                    """,
-                    unsafe_allow_html=True,
+                    """
                 )
                 if logged_in:
                     user_name = escape(str(getattr(st.user, "name", None) or "Google user"))
                     user_email = escape(str(getattr(st.user, "email", None) or ""))
                     initial = str(user_name).strip()[:1].upper() or "G"
-                    st.markdown(
-                        f'<div class="signed-user"><div class="signed-avatar">{initial}</div><div><strong>{user_name}</strong><span>{user_email}</span></div></div>',
-                        unsafe_allow_html=True,
+                    render_safe_html(
+                        f'<div class="signed-user"><div class="signed-avatar">{initial}</div><div><strong>{user_name}</strong><span>{user_email}</span></div></div>'
                     )
-                    st.markdown('<a class="auth-route-link primary" href="./review">Continue to Review Workspace →</a>', unsafe_allow_html=True)
+                    render_safe_html('<a class="auth-route-link primary" href="./review">Continue to Review Workspace →</a>')
                     st.button("Sign out", on_click=st.logout, width="stretch")
                 elif configured:
                     st.button("Continue with Google", type="primary", icon=":material/login:", on_click=st.login, width="stretch")
@@ -3467,7 +3492,7 @@ def account_page():
                     st.button("Continue with Google", disabled=True, width="stretch")
                     st.warning("Google authentication has not been configured yet.")
                     st.caption("Add the Google Client ID and Client Secret to `.streamlit/secrets.toml` to activate sign-in.")
-                st.markdown('<div class="auth-trust">Protected through Google OpenID Connect.</div>', unsafe_allow_html=True)
+                render_safe_html('<div class="auth-trust">Protected through Google OpenID Connect.</div>')
     render_site_footer()
 
 
@@ -3536,6 +3561,7 @@ def run_app():
     global COLUMN_MAPPING_PAGE, LLM_REVIEW_PAGE
     st.set_page_config(page_title="MIRA · Model Inference and Response Annotation", page_icon="◉", layout="wide")
     inject_app_theme()
+    install_navigation_history_support()
     auth_ready = google_auth_configured()
     signed_in = auth_ready and bool(getattr(st.user, "is_logged_in", False))
     COLUMN_MAPPING_PAGE = st.Page(
