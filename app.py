@@ -3699,12 +3699,14 @@ def run_app():
     """Configure and run the multipage Streamlit application."""
     global COLUMN_MAPPING_PAGE, LLM_REVIEW_PAGE
     st.set_page_config(page_title="MIRA · Model Inference and Response Annotation", page_icon="◉", layout="wide")
+    # Load positioning CSS before creating the switch. Otherwise Streamlit can
+    # briefly render it as a normal block and push the page below a blank frame.
+    inject_app_theme()
     dark_mode_enabled = st.toggle(
         "Dark mode",
         key="mira_dark_mode",
         help="Switch the complete MIRA workspace between light and dark themes.",
     )
-    inject_app_theme()
     if dark_mode_enabled:
         inject_dark_mode_theme()
     install_navigation_history_support()
